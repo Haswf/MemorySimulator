@@ -18,8 +18,14 @@ process_t* Process(int timeArrived, int pid, int memory, int jobTime) {
 };
 
 void printProcess(process_t* process) {
-    printf("arrived: %d\tpid: %d\tmemory: %d\tjobTime: %d\n", process->timeArrived, process->pid, process->memory, process->jobTime);
+    fprintf(stderr, "arrived: %d\tpid: %d\tmemory: %d\tjobTime: %d\n", process->timeArrived, process->pid, process->memory, process->jobTime);
 }
 
+void freeProcess(process_t* process) {
+    if (process == NULL) {
+        return;
+    }
+    free(process);
+}
 
 #include "process.h"

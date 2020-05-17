@@ -16,4 +16,6 @@ process_t* Process(int timeArrived, int pid, int memory, int jobTime);
 
 void printProcess(process_t* process);
 
+void freeProcess(process_t* process);
+
 #endif //COMP30023_2020_PROJECT_2_PROCESS_H

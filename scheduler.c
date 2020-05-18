@@ -3,12 +3,7 @@
 //
 
 #include "scheduler.h"
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include "process.h"
-#include "deque.h"
-#include <assert.h>
+
 
 void parseFileName(char** file, int index, int argc, char *argv[]) {
     if (strstr(argv[index], "-f") && index+1 < argc) {
@@ -70,6 +65,7 @@ void inspectArguments(char* fileName, int schedulingAlgorithm, int memoryAllocat
 
 int readProcessesFromFile(char* fileName, Deque* deque) {
     FILE *fp;
+    int count = 0;
 
     fp = fopen(fileName, "r"); // read mode
 
@@ -86,15 +82,16 @@ int readProcessesFromFile(char* fileName, Deque* deque) {
     while((fscanf(fp, "%d %d %d %d\n", &time, &pid, &memory, &jobTime)) != EOF){
         process_t* process = Process(time, pid, memory, jobTime);
         deque_push(deque, process);
+        count++;
     }
 
     fclose(fp);
-    return 0;
+    return count;
 }
 
-void execute(process_t* process, int clock) {
+void execute(process_t* process, int* clock) {
     process->jobTime--;
-    fprintf(stderr, "%d\t: pid: %d is running\n", clock, process->pid);
+    fprintf(stderr, "%d\t: pid: %d is running\n", *clock, process->pid);
 }
 
 int cmpProcess (const void* a, const void* b) {
@@ -131,43 +128,122 @@ int loadNewProcess(Deque* pending, Deque* suspended, int clock) {
 void tick(int* clock) {
     *clock = *clock+1;
 }
-
-int firstComeFirstServe(Deque* pending, Deque* suspended, int* clock) {
-    process_t* process = deque_pop(suspended);
-    while (process->jobTime > 0) {
-        loadNewProcess(pending, suspended, *clock);
-        execute(process, *clock);
-        tick(clock);
-    }
+void finishProcess(process_t* process, int* finish) {
+    *finish += 1;
     freeProcess(process);
 }
 
-int roundRobin(Deque* pending, Deque* suspended, int* clock, int quantum) {
-    process_t* process = deque_pop(suspended);
-    int quantumLeft = quantum;
-    while (quantumLeft > 0) {
-        loadNewProcess(pending, suspended, *clock);
-        execute(process, *clock);
-        tick(clock);
-        quantumLeft--;
+int init(Deque* processes, Deque* pending, Deque* suspended) {
+    while (deque_size(processes) > 0) {
+        process_t *process = deque_pop(processes);
+        if (process->timeArrived > 0) {
+            deque_push(pending, process);
+        } else {
+            deque_push(suspended, process);
+        }
     }
-    if (process->jobTime > 0) {
-        deque_insert(suspended, process);
-    } else {
-        freeProcess(process);
+};
+
+
+int firstComeFirstServe(Deque* processes, int* clock, int* finish) {
+    Deque *suspended = new_deque();
+    Deque *pending = new_deque();
+
+    init(processes, pending, suspended);
+    while (deque_size(suspended) > 0 || deque_size(pending) > 0) {
+        process_t* process = deque_pop(suspended);
+        while (process->jobTime > 0) {
+            loadNewProcess(pending, suspended, *clock);
+            execute(process, clock);
+            tick(clock);
+        }
+        finishProcess(process, finish);
+    }
+}
+
+int roundRobin(Deque* processes, int* clock,  int* finish, int quantum) {
+    Deque *suspended = new_deque();
+    Deque *pending = new_deque();
+    init(processes, pending, suspended);
+
+    while (deque_size(suspended) > 0 || deque_size(pending) > 0) {
+        process_t* process = deque_pop(suspended);
+        int quantumLeft = quantum;
+        while (quantumLeft > 0) {
+            loadNewProcess(pending, suspended, *clock);
+            execute(process, clock);
+            tick(clock);
+            quantumLeft--;
+        }
+        if (process->jobTime > 0) {
+            deque_insert(suspended, process);
+        } else {
+            finishProcess(process, finish);
+        }
     }
 }
 
 
+int shortestRemainingTimeFirst(Deque* processes, int* total, int* clock, int* finished) {
+    heap_t *suspended = createHeap(*total, 0);
+    Deque *pending = new_deque();
+
+    while (deque_size(processes) > 0) {
+        process_t *process = deque_pop(processes);
+        if (process->timeArrived > 0) {
+            deque_push(pending, process);
+        } else {
+            insert(suspended, *process);
+        }
+    }
+
+    while (heapSize(suspended) > 0 || deque_size(pending) > 0){
+
+        int count = 0;
+        Deque* buffer = new_deque();
+
+        while (next_to_pop(pending) && next_to_pop(pending)->timeArrived == *clock) {
+            process_t* process = deque_pop(pending);
+            deque_push(buffer, process);
+            assert(process->timeArrived == *clock);
+            fprintf(stderr, "%d\t: Process %d added to suspended\n", *clock, process->pid);
+            count++;
+        }
+
+        // Sort processes arrived at the same time by its pid
+        process_t toAdd[count];
+        for (int i=0; i<count; i++) {
+            process_t* temp = deque_pop(buffer);
+            toAdd[i] = *temp;
+            freeProcess(temp);
+        }
+        qsort(toAdd, count, sizeof(process_t), cmpProcess);
+        for (int i=0; i<count; i++) {
+            insert(suspended, toAdd[i]);
+        }
+
+        process_t running = popMin(suspended);
+
+        execute(&running, clock);
+
+        if (running.jobTime > 0) {
+            insert(suspended, running);
+        }
+        tick(clock);
+    }
+}
+
+
+
 int main(int argc, char *argv[]) {
-    char* fileName;
+    char *fileName;
     int schedulingAlgorithm;
     int memoryAllocation;
     int memorySize;
     int quantum = 10;
+    int total = 0;
 
-    printf("%d\n", argc);
-    for (int i=1; i<argc; i++) {
+    for (int i = 1; i < argc; i++) {
         parseFileName(&fileName, i, argc, argv);
         parseSchedulingAlgorithm(&schedulingAlgorithm, i, argc, argv);
         parseMemoryAllocation(&memoryAllocation, i, argc, argv);
@@ -175,32 +251,22 @@ int main(int argc, char *argv[]) {
         parseQuantum(&quantum, i, argc, argv);
     }
     inspectArguments(fileName, schedulingAlgorithm, memoryAllocation, memorySize, quantum);
-    Deque* processes = new_deque();
-    Deque* suspended = new_deque();
-    Deque* pending = new_deque();
 
-    readProcessesFromFile(fileName, processes);
-
-    while (deque_size(processes) > 0) {
-        process_t* process = deque_pop(processes);
-        if (process->timeArrived > 0) {
-            deque_push(pending, process);
-        } else {
-            deque_push(suspended, process);
-        }
-    }
+    Deque *processes = new_deque();
+    total = readProcessesFromFile(fileName, processes);
 
     int clock = 0;
+    int finished = 0;
 
-
-    while (deque_size(suspended) > 0 || deque_size(pending) > 0) {
-        if (schedulingAlgorithm == FIRST_COME_FIRST_SERVED) {
-            firstComeFirstServe(pending, suspended, &clock);
-        } else if (schedulingAlgorithm == ROUND_ROBIN){
-            roundRobin(pending, suspended, &clock, quantum);
-        }
+    if (schedulingAlgorithm == FIRST_COME_FIRST_SERVED) {
+        firstComeFirstServe(processes, &clock, &finished);
+    } else if (schedulingAlgorithm == ROUND_ROBIN) {
+        roundRobin(processes, &clock, &finished, quantum);
+    } else if (schedulingAlgorithm == CUSTOMISED_SCHEDULING) {
+        shortestRemainingTimeFirst(processes, &total, &clock, &finished);
     }
-
     return 0;
-}
+};
+
+
 

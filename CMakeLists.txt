@@ -3,4 +3,5 @@ project(comp30023_2020_project_2 C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(comp30023_2020_project_2 scheduler.c scheduler.h process.c process.h deque.c deque.h dlist.h dlist.c)
+add_executable(comp30023_2020_project_2 scheduler.c scheduler.h process.c process.h deque.c deque.h dlist.h dlist.c heap.c heap.h)
+#add_executable(comp30023_2020_project_2 process.c process.h deque.c deque.h dlist.h dlist.c heap.c heap.h)

@@ -14,4 +14,11 @@
 #define VIRTUAL_MEMORY -3
 #define CUSTOMISED_MEMORY -4
 
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include "process.h"
+#include "deque.h"
+#include <assert.h>
+#include "heap.h"
 #endif //COMP30023_2020_PROJECT_2_SCHEDULER_H

@@ -10,13 +10,17 @@
 #include <stdio.h>
 #include "dlist.h"
 
+void empty_cleaner(void* data) {
+
+}
 // helper function to create a new dlist and return its address
-Dlist* new_dlist(){
+Dlist* new_dlist(void (*clean)(void *)){
     Dlist *new = malloc(sizeof(Dlist));
     assert(new);
     new->head = NULL;
     new->tail = NULL;
     new->size = 0;
+    new->clean = clean;
     return new;
 }
 
@@ -29,7 +33,7 @@ void free_dlist(Dlist *ddl) {
     while (curr) {
         // record next node
         next = curr->next;
-        free_node(curr);
+        free_node(curr, ddl->clean);
         curr = next;
     }
     // free the dlist itself
@@ -46,7 +50,7 @@ void free_dlist(Dlist *ddl) {
 //     }
 //     printf("\n");
 // }
-
+//
 // // helper function to print from tail to head
 // void backward_print(Dlist *ddl){
 //     assert(ddl != NULL);
@@ -60,13 +64,14 @@ void free_dlist(Dlist *ddl) {
 
 
 // helper function to clear memory of a node
-void free_node(Node *node) {
+void free_node(Node *node, void (*clean)(void *)) {
+    clean(node->data);
     free(node);
 }
 
 // add an element to the front of a list
 // This operation is O(1)
-void dlist_add_start(Dlist *ddl, Data data){
+Node* dlist_add_start(Dlist *ddl, Data data){
     assert(ddl != NULL);
 
     // create a new node
@@ -90,11 +95,12 @@ void dlist_add_start(Dlist *ddl, Data data){
 
     // keep size updated!
     ddl->size++;
+    return new;
 }
 
 // add an element to the back of a list
 // This operation is O(1)
-void dlist_add_end(Dlist *ddl, Data data) {
+Node* dlist_add_end(Dlist *ddl, Data data) {
     assert(ddl != NULL);
 
     // we'll need a new list node to store this data
@@ -116,6 +122,7 @@ void dlist_add_end(Dlist *ddl, Data data) {
 
     // and keep size updated too
     ddl->size++;
+    return new;
 }
 
 // remove and return the first element from a doubly linked list
@@ -146,7 +153,7 @@ Data dlist_remove_start(Dlist *ddl) {
     ddl->size--;
 
     // free node
-    free_node(curr);
+    free_node(curr, ddl->clean);
 
     // return data retrieved
     return data;
@@ -159,10 +166,56 @@ Node *new_node() {
     return node;
 }
 
+
+Node* dlist_insert_after(Dlist *ddl, Node* after, Data newData) {
+    assert(ddl != NULL);
+    assert(ddl->size > 0);
+    Node* current = ddl->head;
+    while (current) {
+        if (current == after) {
+            Node* new = (Node*)malloc(sizeof(*new));
+            new->data = newData;
+            new->prev = current;
+            new->next = current->next;
+            if (current->next) {
+                current->next->prev = new;
+            }
+            current->next = new;
+            if (new->prev == NULL) {
+                ddl->head = new;
+            }
+            else if (new->next == NULL) {
+                ddl->tail = new;
+            }
+            ddl->size++;
+            return new;
+        }
+        current = current -> next;
+    }
+}
+
+Node* dlist_remove(Dlist *ddl, Node* toRemove) {
+    assert(ddl != NULL);
+    assert(ddl->size > 0);
+
+    if (toRemove->prev) {
+        toRemove->prev->next = toRemove->next;
+    } else {
+        ddl->head = toRemove->next;
+    }
+    if (toRemove->next) {
+        toRemove->next->prev = toRemove->prev;
+    } else {
+        ddl->tail = toRemove->prev;
+    }
+    free_node(toRemove, ddl->clean);
+
+    ddl->size--;
+    return NULL;
+}
 // Remove the last element in a doubly linked list.
 // This operation is (1)
 // Make sure list has at least 1 element.
-
 Data dlist_remove_end(Dlist *ddl) {
     assert(ddl != NULL);
     assert(ddl->size > 0);
@@ -186,7 +239,7 @@ Data dlist_remove_end(Dlist *ddl) {
     ddl->size--;
 
     // we're finished with the list node holding this data
-    free_node(curr);
+    free_node(curr, ddl->clean);
 
     // done!
     return data;
@@ -196,3 +249,6 @@ Data dlist_remove_end(Dlist *ddl) {
 int dlist_size(Dlist*ddl){
     return ddl->size;
 }
+
+
+

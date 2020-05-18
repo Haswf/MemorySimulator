@@ -23,12 +23,13 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "deque.h"
+
 // Create a new empty Deque and return a pointer to it
 //
 // DO NOT CHANGE THIS FUNCTION SIGNATURE
 Deque *new_deque() {
     Deque *newdq = (Deque*)malloc(sizeof(Deque));
-    newdq->list = new_dlist();
+    newdq->list = new_dlist(empty_cleaner);
     return newdq;
 }
 

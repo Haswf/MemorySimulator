@@ -12,7 +12,7 @@
 typedef struct dlist Dlist;
 typedef struct node Node;
 // Change data type stored in dlist
-typedef process_t* Data;
+typedef void* Data;
 
 struct node {
     Node* next;
@@ -24,12 +24,13 @@ struct dlist {
     Node *head;
     Node *tail;
     int size;
+    void (*clean)(void *);
 };
 
 // Dlist Creation and deletion
 
 // helper function to create a new dlist and return its address
-Dlist *new_dlist();
+Dlist* new_dlist(void (*clean)(void *));
 
 //free a dlist node by node
 void free_dlist(Dlist *ddl);
@@ -38,15 +39,15 @@ void free_dlist(Dlist *ddl);
 Node *new_node();
 
 // helper function to clear memory of a node
-void free_node(Node *node);
+void free_node(Node *node, void (*clean)(void *));
 
 // Manipulation
 
 // add an element to the front of a list
-void dlist_add_start(Dlist *ddl, Data data);
+Node* dlist_add_start(Dlist *ddl, Data data);
 
 // add an element to the back of a list
-void dlist_add_end(Dlist *ddl, Data data);
+Node* dlist_add_end(Dlist *ddl, Data data);
 
 // remove and return the first element from a doubly linked list
 Data dlist_remove_start(Dlist *ddl);
@@ -62,5 +63,13 @@ void forward_print(Dlist *ddl);
 
 // helper function to print from tail to head
 void backward_print(Dlist *ddl);
+
+Node* dlist_insert_after(Dlist *ddl, Node* after, Data newData);
+
+Node* dlist_remove(Dlist *ddl, Node* toRemove);
+
+int dlist_test();
+
+void empty_cleaner(void* data);
 
 #endif //DLIST_H

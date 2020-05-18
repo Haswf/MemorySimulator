@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
-project(comp30023_2020_project_2 C)
+project(scheduler C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(comp30023_2020_project_2 scheduler.c scheduler.h process.c process.h deque.c deque.h dlist.h dlist.c heap.c heap.h)
-#add_executable(comp30023_2020_project_2 process.c process.h deque.c deque.h dlist.h dlist.c heap.c heap.h)
+# Add executable target with source files listed in SOURCE_FILES variable
+FILE(GLOB_RECURSE SOURCE_FILE src/*.c)
+add_executable(scheduler ${SOURCE_FILE} src/swapping.c src/swapping.h test/dlist_test.c test/swapping_test.c test/swapping_test.h)

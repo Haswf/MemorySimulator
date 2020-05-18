@@ -174,11 +174,11 @@ int roundRobin(Deque* processes, int* clock,  int* finish, int quantum) {
 
 
 int compare_job_time(void * a, void * b) {
-    return ((data*)a)->jobTime - ((data*)b)->jobTime;
+    return ((process_t*)a)->jobTime - ((process_t*)b)->jobTime;
 }
 
 int compare_PID(void * a, void * b) {
-    return ((data*)a)->pid - ((data*)b)->pid;
+    return ((process_t *)a)->pid - ((process_t*)b)->pid;
 }
 
 int shortestRemainingTimeFirst(Deque* processes, int* total, int* clock, int* finished) {
@@ -229,38 +229,38 @@ void print_remaining_time(void* a) {
 }
 
 
-int main(int argc, char *argv[]) {
-    char *fileName;
-    int schedulingAlgorithm;
-    int memoryAllocation;
-    int memorySize;
-    int quantum = 10;
-    int total = 0;
-
-    for (int i = 1; i < argc; i++) {
-        parseFileName(&fileName, i, argc, argv);
-        parseSchedulingAlgorithm(&schedulingAlgorithm, i, argc, argv);
-        parseMemoryAllocation(&memoryAllocation, i, argc, argv);
-        parseMemorySize(&memorySize, i, argc, argv);
-        parseQuantum(&quantum, i, argc, argv);
-    }
-    inspectArguments(fileName, schedulingAlgorithm, memoryAllocation, memorySize, quantum);
-
-    Deque *processes = new_deque();
-    total = readProcessesFromFile(fileName, processes);
-
-    int clock = 0;
-    int finished = 0;
-
-    if (schedulingAlgorithm == FIRST_COME_FIRST_SERVED) {
-        firstComeFirstServe(processes, &clock, &finished);
-    } else if (schedulingAlgorithm == ROUND_ROBIN) {
-        roundRobin(processes, &clock, &finished, quantum);
-    } else if (schedulingAlgorithm == CUSTOMISED_SCHEDULING) {
-        shortestRemainingTimeFirst(processes, &total, &clock, &finished);
-    }
-    return 0;
-};
-
+//int main(int argc, char *argv[]) {
+//    char *fileName = NULL;
+//    int schedulingAlgorithm = -1;
+//    int memoryAllocation = -1;
+//    int memorySize = -1;
+//    int quantum = 10;
+//    int total = 0;
+//
+//    for (int i = 1; i < argc; i++) {
+//        parseFileName(&fileName, i, argc, argv);
+//        parseSchedulingAlgorithm(&schedulingAlgorithm, i, argc, argv);
+//        parseMemoryAllocation(&memoryAllocation, i, argc, argv);
+//        parseMemorySize(&memorySize, i, argc, argv);
+//        parseQuantum(&quantum, i, argc, argv);
+//    }
+//    inspectArguments(fileName, schedulingAlgorithm, memoryAllocation, memorySize, quantum);
+//
+//    Deque *processes = new_deque();
+//    total = readProcessesFromFile(fileName, processes);
+//
+//    int clock = 0;
+//    int finished = 0;
+//
+//    if (schedulingAlgorithm == FIRST_COME_FIRST_SERVED) {
+//        firstComeFirstServe(processes, &clock, &finished);
+//    } else if (schedulingAlgorithm == ROUND_ROBIN) {
+//        roundRobin(processes, &clock, &finished, quantum);
+//    } else if (schedulingAlgorithm == CUSTOMISED_SCHEDULING) {
+//        shortestRemainingTimeFirst(processes, &total, &clock, &finished);
+//    }
+//    return 0;
+//};
+//
 
 

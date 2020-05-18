@@ -22,7 +22,7 @@ Node* first_fit(memory_list_t* memoryList, process_t* process);
 Node* allocate(memory_list_t* memoryList, Node* hole, process_t* process);
 void print_memory_list(memory_list_t* memoryList);
 Node* evict(memory_list_t* memoryList, Node* nodeToEvict);
-void use_memory(memory_list_t* memoryList, int pid, int clock);
+void use_memory(memory_list_t* memoryList, process_t* process, int* clock);
 Node* find_least_recently_used(memory_list_t* memoryList);
-
+void allocate_memory(memory_list_t* memoryList, process_t* process);
 #endif //SCHEDULER_SWAPPING_H

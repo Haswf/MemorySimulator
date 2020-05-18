@@ -91,7 +91,7 @@ int readProcessesFromFile(char* fileName, Deque* deque) {
 
 void execute(process_t* process, int* clock) {
     process->jobTime--;
-    fprintf(stderr, "%d: %d\n", *clock, process->pid);
+//    fprintf(stderr, "%d: %d\n", *clock, process->pid);
 }
 
 int load_process(Deque* pending, Deque* suspended, int* clock) {
@@ -134,19 +134,29 @@ int init(Deque* processes, Deque* pending, Deque* suspended) {
 };
 
 
-int firstComeFirstServe(Deque* processes, int* clock, int* finish) {
+int firstComeFirstServe(Deque* processes, int* clock, Deque* finish) {
+    memory_list_t* memory = create_memory_list();
+    init_memory_list(memory, 1000);
+
     Deque *suspended = new_deque();
     Deque *pending = new_deque();
+
 
     init(processes, pending, suspended);
     while (deque_size(suspended) > 0 || deque_size(pending) > 0) {
         process_t* process = deque_pop(suspended);
+        allocate_memory(memory, process);
+        fprintf(stderr, "Allocating Memory for process %d (%d bytes)\n", process->pid, process->memory);
+//        print_memory_list(memory);
+//        printf("------------\n");
         while (process->jobTime > 0) {
             load_process(pending, suspended, clock);
             execute(process, clock);
+            use_memory(memory, process, clock);
             tick(clock);
         }
-        finishProcess(process, finish);
+        deque_push(finish, process);
+//        finishProcess(process, finish);
     }
 }
 
@@ -229,38 +239,38 @@ void print_remaining_time(void* a) {
 }
 
 
-//int main(int argc, char *argv[]) {
-//    char *fileName = NULL;
-//    int schedulingAlgorithm = -1;
-//    int memoryAllocation = -1;
-//    int memorySize = -1;
-//    int quantum = 10;
-//    int total = 0;
-//
-//    for (int i = 1; i < argc; i++) {
-//        parseFileName(&fileName, i, argc, argv);
-//        parseSchedulingAlgorithm(&schedulingAlgorithm, i, argc, argv);
-//        parseMemoryAllocation(&memoryAllocation, i, argc, argv);
-//        parseMemorySize(&memorySize, i, argc, argv);
-//        parseQuantum(&quantum, i, argc, argv);
-//    }
-//    inspectArguments(fileName, schedulingAlgorithm, memoryAllocation, memorySize, quantum);
-//
-//    Deque *processes = new_deque();
-//    total = readProcessesFromFile(fileName, processes);
-//
-//    int clock = 0;
-//    int finished = 0;
-//
-//    if (schedulingAlgorithm == FIRST_COME_FIRST_SERVED) {
-//        firstComeFirstServe(processes, &clock, &finished);
-//    } else if (schedulingAlgorithm == ROUND_ROBIN) {
-//        roundRobin(processes, &clock, &finished, quantum);
-//    } else if (schedulingAlgorithm == CUSTOMISED_SCHEDULING) {
-//        shortestRemainingTimeFirst(processes, &total, &clock, &finished);
-//    }
-//    return 0;
-//};
-//
+int main(int argc, char *argv[]) {
+    char *fileName = NULL;
+    int schedulingAlgorithm = -1;
+    int memoryAllocation = -1;
+    int memorySize = -1;
+    int quantum = 10;
+    int total = 0;
+
+    for (int i = 1; i < argc; i++) {
+        parseFileName(&fileName, i, argc, argv);
+        parseSchedulingAlgorithm(&schedulingAlgorithm, i, argc, argv);
+        parseMemoryAllocation(&memoryAllocation, i, argc, argv);
+        parseMemorySize(&memorySize, i, argc, argv);
+        parseQuantum(&quantum, i, argc, argv);
+    }
+    inspectArguments(fileName, schedulingAlgorithm, memoryAllocation, memorySize, quantum);
+
+    Deque *processes = new_deque();
+    Deque *finished = new_deque();
+    total = readProcessesFromFile(fileName, processes);
+
+    int clock = 0;
+
+    if (schedulingAlgorithm == FIRST_COME_FIRST_SERVED) {
+        firstComeFirstServe(processes, &clock, &finished);
+    } else if (schedulingAlgorithm == ROUND_ROBIN) {
+        roundRobin(processes, &clock, &finished, quantum);
+    } else if (schedulingAlgorithm == CUSTOMISED_SCHEDULING) {
+        shortestRemainingTimeFirst(processes, &total, &clock, &finished);
+    }
+    return 0;
+};
+
 
 

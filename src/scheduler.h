@@ -21,6 +21,8 @@
 #include "deque.h"
 #include <assert.h>
 #include "heap.h"
+#include "swapping.h"
+#include "memory_fragment.h"
 
 int compare_PID(void * a, void * b);
 

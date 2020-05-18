@@ -127,18 +127,32 @@ Node* evict(memory_list_t* memoryList, Node* nodeToEvict) {
     return merged;
 }
 
-void use_memory(memory_list_t* memoryList, int pid, int clock) {
+void allocate_memory(memory_list_t* memoryList, process_t* process) {
+    Node* freeSpace = first_fit(memoryList, process);
+    while (!freeSpace){
+        fprintf(stderr, "Insufficient memory for process %d\t requiring %d bytes\n", process->pid, process->memory);
+        Node* toEvict = find_least_recently_used(memoryList);
+        memory_fragment_t* fragment = (memory_fragment_t*)toEvict->data;
+        fprintf(stderr, "Evicting pages for process %d (last access: %d) with %d bytes\n", fragment->process->pid, fragment->last_access, fragment->process->memory);
+        evict(memoryList, toEvict);
+        freeSpace = first_fit(memoryList, process);
+    }
+    allocate(memoryList, freeSpace, process);
+}
+
+void use_memory(memory_list_t* memoryList, process_t* process, int* clock) {
+    assert(memoryList && process);
     Node* current = memoryList->list->head;
     while (current) {
         memory_fragment_t* fragment = (memory_fragment_t*)current->data;
-        if (fragment->type == PROCESS_FRAGMENT && fragment->process->pid == pid) {
-            fragment->last_access = clock;
+        if (fragment->type == PROCESS_FRAGMENT && fragment->process->pid == process->pid) {
+            fragment->last_access = *clock;
         }
         current = current->next;
     }
 }
 
-int main(){
-   evict_test();
-
-}
+//int main(){
+//   evict_test();
+//
+//}

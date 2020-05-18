@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-process_t* Process(int timeArrived, int pid, int memory, int jobTime) {
+process_t* create_process(int timeArrived, int pid, int memory, int jobTime) {
     process_t* newProcess = (process_t*)malloc(sizeof(*newProcess));
     if (newProcess == NULL) {
         return NULL;

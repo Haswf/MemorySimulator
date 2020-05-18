@@ -15,14 +15,14 @@ typedef struct Heap{
     data *arr;
     int count;
     int capacity;
-    int heap_type; // 0 for min heap , 1 for max heap
+    int (*cmp)(void *, void *);
 } heap_t;
 //typedef process_t data;
-void heapifyBottomTop(heap_t *h,int index);
-heap_t *createHeap(int capacity,int heap_type);
-void insert(heap_t *h, data key);
-void print(heap_t *h);
-data popMin(heap_t *h);
-int heapSize(heap_t* heap);
+void heapify_bottom_top(heap_t *h,int index);
+heap_t *create_heap(int capacity, int (*cmp)(void *, void *));
+void heap_insert(heap_t *h, data key);
+void heap_print(heap_t *h, void (*print)(void *));
+data heap_pop_min(heap_t *h);
+int heap_size(heap_t* heap);
 
 #endif //HEAP_H

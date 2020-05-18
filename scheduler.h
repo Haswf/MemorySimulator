@@ -21,4 +21,8 @@
 #include "deque.h"
 #include <assert.h>
 #include "heap.h"
+
+int compare_PID(void * a, void * b);
+
+#define MAX_PROCESS_ARRIVAL_PER_TICK 100
 #endif //COMP30023_2020_PROJECT_2_SCHEDULER_H

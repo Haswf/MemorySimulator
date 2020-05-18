@@ -12,7 +12,7 @@ typedef struct process {
     int jobTime;
 } process_t;
 
-process_t* Process(int timeArrived, int pid, int memory, int jobTime);
+process_t* create_process(int timeArrived, int pid, int memory, int jobTime);
 
 void printProcess(process_t* process);
 

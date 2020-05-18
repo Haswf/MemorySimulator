@@ -5,11 +5,11 @@
  Array Implementation of MinHeap data Structure
 */
 
-int heapSize(heap_t* heap) {
+int heap_size(heap_t* heap) {
     return heap->count;
 }
 
-heap_t *createHeap(int capacity,int heap_type){
+heap_t *create_heap(int capacity, int (*cmp)(void *, void *)){
     heap_t *h = (heap_t * ) malloc(sizeof(*h)); //one is number of heap
 
     //check if memory allocation is fails
@@ -17,11 +17,10 @@ heap_t *createHeap(int capacity,int heap_type){
         printf("Memory Error!");
         return NULL;
     }
-    h->heap_type = heap_type;
     h->count=0;
     h->capacity = capacity;
     h->arr = (data *) malloc(capacity*sizeof(data)); //size in bytes
-
+    h->cmp = cmp;
     //check if allocation succeed
     if ( h->arr == NULL){
         printf("Memory Error!");
@@ -30,32 +29,30 @@ heap_t *createHeap(int capacity,int heap_type){
     return h;
 }
 
-void insert(heap_t *h, data key){
+void heap_insert(heap_t *h, data key){
     if( h->count < h->capacity){
         h->arr[h->count] = key;
-        heapifyBottomTop(h, h->count);
+        heapify_bottom_top(h, h->count);
         h->count++;
     }
 }
 
-int cmpData(data a, data b) {
-    return a.jobTime - b.jobTime;
-}
 
-void heapifyBottomTop(heap_t *h,int index){
+
+void heapify_bottom_top(heap_t *h,int index){
     data temp;
     int parent_node = (index-1)/2;
 
-    if (cmpData(h->arr[parent_node], h->arr[index])){
+    if (h->cmp(&(h->arr[parent_node]), &(h->arr[index]))){
         //swap and recursive call
         temp = h->arr[parent_node];
         h->arr[parent_node] = h->arr[index];
         h->arr[index] = temp;
-        heapifyBottomTop(h,parent_node);
+        heapify_bottom_top(h,parent_node);
     }
 }
 
-void heapifyTopBottom(heap_t *h, int parent_node){
+void heapify_top_bottom(heap_t *h, int parent_node){
     int left = parent_node*2+1;
     int right = parent_node*2+2;
     int min;
@@ -66,15 +63,13 @@ void heapifyTopBottom(heap_t *h, int parent_node){
     if(right >= h->count || right <0)
         right = -1;
 
-//    if(left != -1 && h->arr[left] < h->arr[parent_node]) {
-    if(left != -1 && cmpData(h->arr[left], h->arr[parent_node]) < 0) {
+    if(left != -1 && h->cmp(&h->arr[left], &h->arr[parent_node]) < 0) {
         min=left;
     }
     else {
         min = parent_node;
     }
-//    if(right != -1 && h->arr[right] < h->arr[min])
-    if(right != -1 && cmpData(h->arr[right], h->arr[min]) < 0)
+    if(right != -1 && h->cmp(&h->arr[right], &h->arr[min]) < 0)
         min = right;
 
     if(min != parent_node){
@@ -83,11 +78,11 @@ void heapifyTopBottom(heap_t *h, int parent_node){
         h->arr[parent_node] = temp;
 
         // recursive  call
-        heapifyTopBottom(h, min);
+        heapify_top_bottom(h, min);
     }
 }
 
-data popMin(heap_t *h){
+data heap_pop_min(heap_t *h){
     data pop;
     if(h->count==0){
         printf("\n__Heap is Empty__\n");
@@ -96,15 +91,14 @@ data popMin(heap_t *h){
     pop = h->arr[0];
     h->arr[0] = h->arr[h->count-1];
     h->count--;
-    heapifyTopBottom(h, 0);
+    heapify_top_bottom(h, 0);
     return pop;
 }
 
-void print(heap_t *h){
+
+void heap_print(heap_t *h, void (*print)(void *)){
     int i;
-    printf("____________Print Heap_____________\n");
     for(i=0;i< h->count;i++){
-        printProcess(&h->arr[i]);
+        print(&h->arr[i]);
     }
-    printf("->__/\\__\n");
 }

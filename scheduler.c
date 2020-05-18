@@ -80,7 +80,7 @@ int readProcessesFromFile(char* fileName, Deque* deque) {
     int jobTime = -1;
 
     while((fscanf(fp, "%d %d %d %d\n", &time, &pid, &memory, &jobTime)) != EOF){
-        process_t* process = Process(time, pid, memory, jobTime);
+        process_t* process = create_process(time, pid, memory, jobTime);
         deque_push(deque, process);
         count++;
     }
@@ -91,36 +91,25 @@ int readProcessesFromFile(char* fileName, Deque* deque) {
 
 void execute(process_t* process, int* clock) {
     process->jobTime--;
-    fprintf(stderr, "%d\t: pid: %d is running\n", *clock, process->pid);
+    fprintf(stderr, "%d: %d\n", *clock, process->pid);
 }
 
-int cmpProcess (const void* a, const void* b) {
-    return ((process_t*)a)->pid - ((process_t*)b)->pid;
-}
-
-int loadNewProcess(Deque* pending, Deque* suspended, int clock) {
+int load_process(Deque* pending, Deque* suspended, int* clock) {
     int count = 0;
-    Deque* buffer = new_deque();
-
-    while (next_to_pop(pending) && next_to_pop(pending)->timeArrived == clock) {
+    heap_t* toAdd = create_heap(MAX_PROCESS_ARRIVAL_PER_TICK, compare_PID);
+    while (deque_size(pending) && next_to_pop(pending)->timeArrived == *clock) {
         process_t* process = deque_pop(pending);
-        deque_push(buffer, process);
-        assert(process->timeArrived == clock);
-        fprintf(stderr, "%d\t: Process %d added to suspended\n", clock, process->pid);
-        count++;
+        assert(process->timeArrived == *clock);
+        heap_insert(toAdd, *process);
+//        fprintf(stderr, "%d\t: Process %d added to suspended\n", *clock, process->pid);
+        freeProcess(process);
     }
 
-    // Sort processes arrived at the same time by its pid
-    process_t toAdd[count];
-    for (int i=0; i<count; i++) {
-        process_t* temp = deque_pop(buffer);
-        toAdd[i] = *temp;
-        freeProcess(temp);
-    }
-    qsort(toAdd, count, sizeof(process_t), cmpProcess);
-    for (int i=0; i<count; i++) {
-        printProcess(&toAdd[i]);
-        deque_insert(suspended, memcpy(malloc(sizeof(*toAdd)), &toAdd[i], sizeof(*toAdd)));
+    while (heap_size(toAdd) > 0) {
+        process_t next_process = heap_pop_min(toAdd);
+        process_t* next = create_process(next_process.timeArrived, next_process.pid, next_process.memory, next_process.jobTime);
+        deque_insert(suspended, next);
+        count++;
     }
     return count;
 }
@@ -153,7 +142,7 @@ int firstComeFirstServe(Deque* processes, int* clock, int* finish) {
     while (deque_size(suspended) > 0 || deque_size(pending) > 0) {
         process_t* process = deque_pop(suspended);
         while (process->jobTime > 0) {
-            loadNewProcess(pending, suspended, *clock);
+            load_process(pending, suspended, clock);
             execute(process, clock);
             tick(clock);
         }
@@ -170,7 +159,7 @@ int roundRobin(Deque* processes, int* clock,  int* finish, int quantum) {
         process_t* process = deque_pop(suspended);
         int quantumLeft = quantum;
         while (quantumLeft > 0) {
-            loadNewProcess(pending, suspended, *clock);
+            load_process(pending, suspended, clock);
             execute(process, clock);
             tick(clock);
             quantumLeft--;
@@ -184,8 +173,16 @@ int roundRobin(Deque* processes, int* clock,  int* finish, int quantum) {
 }
 
 
+int compare_job_time(void * a, void * b) {
+    return ((data*)a)->jobTime - ((data*)b)->jobTime;
+}
+
+int compare_PID(void * a, void * b) {
+    return ((data*)a)->pid - ((data*)b)->pid;
+}
+
 int shortestRemainingTimeFirst(Deque* processes, int* total, int* clock, int* finished) {
-    heap_t *suspended = createHeap(*total, 0);
+    heap_t *suspended = create_heap(*total, compare_job_time);
     Deque *pending = new_deque();
 
     while (deque_size(processes) > 0) {
@@ -193,46 +190,43 @@ int shortestRemainingTimeFirst(Deque* processes, int* total, int* clock, int* fi
         if (process->timeArrived > 0) {
             deque_push(pending, process);
         } else {
-            insert(suspended, *process);
+            heap_insert(suspended, *process);
         }
     }
 
-    while (heapSize(suspended) > 0 || deque_size(pending) > 0){
+    while (heap_size(suspended) > 0 || deque_size(pending) > 0){
 
-        int count = 0;
-        Deque* buffer = new_deque();
+        heap_t* toAdd = create_heap(MAX_PROCESS_ARRIVAL_PER_TICK, compare_PID);
 
-        while (next_to_pop(pending) && next_to_pop(pending)->timeArrived == *clock) {
+        while (deque_size(pending) && next_to_pop(pending)->timeArrived == *clock) {
             process_t* process = deque_pop(pending);
-            deque_push(buffer, process);
             assert(process->timeArrived == *clock);
+            heap_insert(toAdd, *process);
+            freeProcess(process);
             fprintf(stderr, "%d\t: Process %d added to suspended\n", *clock, process->pid);
-            count++;
         }
 
-        // Sort processes arrived at the same time by its pid
-        process_t toAdd[count];
-        for (int i=0; i<count; i++) {
-            process_t* temp = deque_pop(buffer);
-            toAdd[i] = *temp;
-            freeProcess(temp);
-        }
-        qsort(toAdd, count, sizeof(process_t), cmpProcess);
-        for (int i=0; i<count; i++) {
-            insert(suspended, toAdd[i]);
+        while (heap_size(toAdd) > 0) {
+            process_t next = heap_pop_min(toAdd);
+            heap_insert(suspended, next);
         }
 
-        process_t running = popMin(suspended);
+        process_t running = heap_pop_min(suspended);
 
         execute(&running, clock);
 
         if (running.jobTime > 0) {
-            insert(suspended, running);
+            heap_insert(suspended, running);
         }
         tick(clock);
     }
 }
 
+
+void print_remaining_time(void* a) {
+    process_t* this = ((process_t*)a);
+    printf("%d: %d\n", this->pid, this->jobTime);
+}
 
 
 int main(int argc, char *argv[]) {

@@ -3,9 +3,11 @@
 //
 
 #include "memory_fragment.h"
+
 #include <stdlib.h>
 #include <stdio.h>
-#include "swapping.h"
+
+
 memory_fragment_t* create_hole_fragment(int byte_start, int page_start, int byte_length, int page_length) {
     memory_fragment_t* fragment = (memory_fragment_t*)malloc(sizeof(*fragment));
     fragment->type = HOLE_FRAGMENT;
@@ -15,6 +17,7 @@ memory_fragment_t* create_hole_fragment(int byte_start, int page_start, int byte
     fragment->page_length = page_length;
     fragment -> pid = -1;
     fragment->last_access = -1;
+    fragment->load_time = -1;
     return fragment;
 }
 
@@ -27,6 +30,7 @@ memory_fragment_t* create_process_fragment(int byte_start, int page_start, int b
     fragment->page_length = page_length;
     fragment -> pid = pid;
     fragment->last_access= -1;
+    fragment->load_time = page_length*LOADING_TIME_PER_PAGE;
     return fragment;
 }
 
@@ -38,7 +42,8 @@ void log_fragment(memory_fragment_t* fragment) {
             fragment->byte_length,
             fragment->page_length,
             fragment->pid,
-            fragment->last_access);
+            fragment->last_access
+            );
 }
 
 void free_fragment(memory_fragment_t* fragment) {

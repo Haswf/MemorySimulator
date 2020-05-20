@@ -3,8 +3,9 @@
 //
 
 #include "scheduler.h"
+#include "unlimited.h"
 #include "log.h"
-#include "log.c"
+//#include "log.c"
 #include "memory_fragment.h"
 /**
  * memory page size
@@ -94,13 +95,14 @@ int readProcessesFromFile(char* fileName, Deque* deque) {
     return count;
 }
 
-void execute(process_t* process, int clock) {
+void execute(process_t* process) {
     static process_t* last = NULL;
     process->jobTime--;
     if (process!=last) {
         log_info("<Scheduler> process %d start executing", process->pid);
         last = process;
     }
+    log_trace("<Scheduler> process %d is running", process->pid);
 }
 
 int load_process(Deque* pending, Deque* suspended, int clock) {
@@ -137,54 +139,80 @@ int init(Deque* processes, Deque* pending, Deque* suspended) {
             deque_push(suspended, process);
         }
     }
+    return 0;
 };
 
 
-int firstComeFirstServe(Deque* processes, int* clock, int* finish) {
-    memory_list_t* memory = create_memory_list(1000, PAGE_SIZE);
-
+int firstComeFirstServe(memory_allocator_t* allocator, Deque* processes, int* clock, int* finish) {
     Deque *suspended = new_deque();
     Deque *pending = new_deque();
 
-
     init(processes, pending, suspended);
     while (deque_size(suspended) > 0 || deque_size(pending) > 0) {
+        load_process(pending, suspended, *clock);
         process_t* process = deque_pop(suspended);
-        log_info("<Scheduler> Memory allocated for process %d (%d bytes)", *clock, process->pid, process->memory);
-        allocate_memory(memory, process, *clock);
+
+        if (allocator->load_time_left(allocator->structure, process) < 0) {
+            void* allocation = allocator->allocate_memory(allocator->structure, process);
+            if (!allocation){
+                log_warn("OOM for process %d", process->pid);
+                finish_process(process, finish, *clock);
+                break;
+            }
+        }
+
         while (process->jobTime > 0) {
+            if ((allocator->load_time_left(allocator->structure, process)) > 0) {
+                allocator->load_memory(allocator->structure, process);
+            } else {
+                execute(process);
+                allocator->use_memory(allocator->structure, process, *clock);
+            }
             load_process(pending, suspended, *clock);
-            execute(process, *clock);
-            use_memory(memory, process, *clock);
             tick(clock);
         }
-//        log_memory_list(memory);
         /* A process that has 0 seconds left to run, should be "evicted" from memory before marking the process as
          * finished
          */
-        free_memory(memory, process, *clock);
-//        log_memory_list(memory);
+        allocator->free_memory(allocator->structure, process);
         finish_process(process, finish, *clock);
     }
 }
 
-int roundRobin(Deque* processes, int* clock,  int* finish, int quantum) {
+int roundRobin(memory_allocator_t* allocator, Deque* processes, int* clock, int* finish, int quantum) {
     Deque *suspended = new_deque();
     Deque *pending = new_deque();
     init(processes, pending, suspended);
 
     while (deque_size(suspended) > 0 || deque_size(pending) > 0) {
-        process_t* process = deque_pop(suspended);
+        load_process(pending, suspended, *clock);
         int quantumLeft = quantum;
+        process_t* process = deque_pop(suspended);
+        // Allocate space for the process if it's not in the memory
+        if (allocator->load_time_left(allocator->structure, process) < 0) {
+            void* allocation = allocator->allocate_memory(allocator->structure, process);
+            if (!allocation){
+                log_warn("OOM for process %d", process->pid);
+                finish_process(process, finish, *clock);
+                continue;
+            }
+        }
+
         while (quantumLeft > 0) {
-            load_process(pending, suspended, *clock);
-            execute(process, *clock);
+            if ((allocator->load_time_left(allocator->structure, process)) > 0) {
+                allocator->load_memory(allocator->structure, process);
+            }
+            else {
+                execute(process);
+                allocator->use_memory(allocator->structure, process, *clock);
+                quantumLeft--;
+            }
             tick(clock);
-            quantumLeft--;
         }
         if (process->jobTime > 0) {
             deque_insert(suspended, process);
         } else {
+            allocator->free_memory(allocator->structure, process);
             finish_process(process, finish, *clock);
         }
     }
@@ -199,10 +227,10 @@ int compare_PID(void * a, void * b) {
     return ((process_t *)a)->pid - ((process_t*)b)->pid;
 }
 
-int shortestRemainingTimeFirst(Deque* processes, int* total, int* clock, int* finished) {
+
+int shortestRemainingTimeFirst(memory_allocator_t* allocator, Deque* processes, int* total, int* clock, int* finished) {
     heap_t *suspended = create_heap(*total, compare_job_time);
     Deque *pending = new_deque();
-
     while (deque_size(processes) > 0) {
         process_t *process = deque_pop(processes);
         if (process->timeArrived > 0) {
@@ -213,39 +241,50 @@ int shortestRemainingTimeFirst(Deque* processes, int* total, int* clock, int* fi
     }
 
     while (heap_size(suspended) > 0 || deque_size(pending) > 0){
-
+        // Add newly arrived processes
         heap_t* toAdd = create_heap(MAX_PROCESS_ARRIVAL_PER_TICK, compare_PID);
-
         while (deque_size(pending) && next_to_pop(pending)->timeArrived == *clock) {
             process_t* process = deque_pop(pending);
             assert(process->timeArrived == *clock);
             heap_insert(toAdd, *process);
             free_process(process);
-            fprintf(stderr, "t=%d\t: Process %d added to suspended\n", *clock, process->pid);
+            log_info("Process %d added to suspended", *clock, process->pid);
         }
-
         while (heap_size(toAdd) > 0) {
             process_t next = heap_pop_min(toAdd);
             heap_insert(suspended, next);
         }
+        if (heap_size(suspended) > 0) {
+            process_t running = heap_pop_min(suspended);
+            process_t* process = &running;
+            log_debug("<Scheduler> Next process to execute is %d", process->pid);
+            if (allocator->load_time_left(allocator->structure, process) < 0){
+                void* allocation = allocator->allocate_memory(allocator->structure, process);
+                if (!allocation){
+                    log_warn("OOM for process %d", process->pid);
+                    *finished += 1;
+                    log_info("<Scheduler> Process %d skipped",process->pid);
+                    continue;
+                }
+            }
+            if ((allocator->load_time_left(allocator->structure, process)) > 0) {
+                allocator->load_memory(allocator->structure, process);
+            } else {
+                execute(process);
+                allocator->use_memory(allocator->structure, process, *clock);
+            }
 
-        process_t running = heap_pop_min(suspended);
-
-        execute(&running, clock);
-
-        if (running.jobTime > 0) {
-            heap_insert(suspended, running);
+            if (running.jobTime > 0) {
+                heap_insert(suspended, running);
+            } else {
+                allocator->free_memory(allocator->structure, process);
+                log_info("<Scheduler> Process %d finished",process->pid);
+                *finished += 1;
+            }
         }
         tick(clock);
     }
 }
-
-
-void print_remaining_time(void* a) {
-    process_t* this = ((process_t*)a);
-    printf("%d: %d\n", this->pid, this->jobTime);
-}
-
 
 int main(int argc, char *argv[]) {
     char *fileName = NULL;
@@ -265,6 +304,27 @@ int main(int argc, char *argv[]) {
     }
     inspectArguments(fileName, schedulingAlgorithm, memoryAllocation, memorySize, quantum);
 
+    memory_allocator_t* allocator = NULL;
+    if (memoryAllocation == UNLIMITED) {
+        allocator = create_memory_allocator(
+                unlimited_allocate_memory,
+                unlimited_use_memory,
+                unlimited_free_memory,
+                unlimited_load_memory,
+                unlimited_load_time_left,
+                NULL
+        );
+    } else if (memoryAllocation == SWAPPING) {
+        allocator = create_memory_allocator(
+                (void *(*)(void *, process_t *)) swapping_allocate_memory,
+                (void (*)(void *, process_t *, int)) swapping_use_memory,
+                (void (*)(void *, process_t *)) swapping_free_memory,
+                (void (*)(void *, process_t *)) swapping_load_memory,
+                (int (*)(void *, process_t *)) swapping_load_time_left,
+                create_memory_list(memorySize, PAGE_SIZE)
+        );
+    }
+
     Deque *processes = new_deque();
     int finished = 0;
     total = readProcessesFromFile(fileName, processes);
@@ -272,14 +332,17 @@ int main(int argc, char *argv[]) {
     int clock = 0;
 
     if (schedulingAlgorithm == FIRST_COME_FIRST_SERVED) {
-        firstComeFirstServe(processes, &clock, &finished);
+        firstComeFirstServe(allocator, processes, &clock, &finished);
     } else if (schedulingAlgorithm == ROUND_ROBIN) {
-        roundRobin(processes, &clock, &finished, quantum);
+        roundRobin(allocator, processes, &clock, &finished, quantum);
     } else if (schedulingAlgorithm == CUSTOMISED_SCHEDULING) {
-        shortestRemainingTimeFirst(processes, &total, &clock, &finished);
+        shortestRemainingTimeFirst(allocator, processes, &total, &clock, &finished);
     }
     return 0;
 };
 
+int simulate() {
+
+}
 
 

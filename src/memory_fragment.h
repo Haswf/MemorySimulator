@@ -8,6 +8,7 @@
 #define PROCESS_FRAGMENT 6
 #include "process.h"
 #include "log.h"
+#define LOADING_TIME_PER_PAGE 2
 
 typedef struct memory_fragment {
     int type;
@@ -17,6 +18,7 @@ typedef struct memory_fragment {
     int byte_length;
     int pid;
     int last_access;
+    int load_time;
 } memory_fragment_t;
 
 memory_fragment_t* create_hole_fragment(int byte_start, int page_start, int byte_length, int page_length);

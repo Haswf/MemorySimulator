@@ -15,7 +15,7 @@
 #include "swapping.h"
 #include "memory_fragment.h"
 #include "log.h"
-
+#include "memory_allocator.h"
 #define FIRST_COME_FIRST_SERVED 1
 #define ROUND_ROBIN 2
 #define CUSTOMISED_SCHEDULING 3
@@ -24,15 +24,15 @@
 #define SWAPPING -2
 #define VIRTUAL_MEMORY -3
 #define CUSTOMISED_MEMORY -4
-#define LOG_LEVEL LOG_INFO
+//#define LOG_LEVEL LOG_INFO
 //#define LOG_LEVEL LOG_DEBUG
-//#define LOG_LEVEL LOG_TRACE
+#define LOG_LEVEL LOG_TRACE
 
 #include "log.h"
 
 int compare_PID(void * a, void * b);
 
-int firstComeFirstServe(Deque* processes, int* clock, int* finish);
+int firstComeFirstServe(memory_allocator_t* allocator, Deque* processes, int* clock, int* finish);
 
 #define MAX_PROCESS_ARRIVAL_PER_TICK 100
 #endif //COMP30023_2020_PROJECT_2_SCHEDULER_H

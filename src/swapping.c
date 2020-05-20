@@ -3,7 +3,6 @@
 //
 #include "swapping.h"
 #include "../test/swapping_test.h"
-
 /**
  * Create a memory list
  * @param mem_size total memory size
@@ -39,7 +38,7 @@ void free_memory_list(memory_list_t* memoryList) {
  * @param clock current time for logging purpose
  * @return
  */
-Node* first_fit(memory_list_t* memoryList, process_t* process, int clock) {
+Node* first_fit(memory_list_t* memoryList, process_t* process) {
     assert(memoryList);
     assert(process);
     /*
@@ -50,8 +49,7 @@ Node* first_fit(memory_list_t* memoryList, process_t* process, int clock) {
     while (current) {
         memory_fragment_t* fragment = (memory_fragment_t*) current->data;
         if (fragment->type == HOLE_FRAGMENT && fragment->page_length > pages_required) {
-            log_debug("<MEMORY> First fit for pid %d (%d pages) is at %d", clock, process->pid, pages_required, fragment->page_start);
-            log_fragment(fragment);
+            log_debug("<MEMORY> First fit for pid %d (%d pages) is at %d", process->pid, pages_required, fragment->page_start);
             return current;
         }
         current = current->next;
@@ -106,10 +104,41 @@ Node* allocate(memory_list_t* memoryList, Node* hole, process_t* process) {
     // Convert the hole fragment to a process fragment
     fragment->byte_length = required_memory;
     // update page start
-    fragment->page_length = fragment->page_start + required_page;
+    fragment->page_length = required_page;
+    fragment->load_time = LOADING_TIME_PER_PAGE * required_page;
     fragment->type = PROCESS_FRAGMENT;
     fragment->pid = process->pid;
+    log_info("<Scheduler> Memory allocated for process %d (%d bytes)", process->pid, process->memory);
     return hole;
+}
+int swapping_load_time_left(memory_list_t* memoryList, process_t* process) {
+    Node* current = memoryList->list->head;
+    memory_fragment_t* fragment = NULL;
+    while (current) {
+        fragment = (memory_fragment_t*)current->data;
+        if (fragment->type == PROCESS_FRAGMENT) {
+            if (fragment->pid == process->pid) {
+                return fragment->load_time ;
+            }
+        }
+        current = current->next;
+    }
+    return -1;
+}
+
+void swapping_load_memory(memory_list_t* memoryList, process_t* process) {
+    Node* current = memoryList->list->head;
+    memory_fragment_t* fragment = NULL;
+    while (current) {
+        fragment = (memory_fragment_t*)current->data;
+        if (fragment->type == PROCESS_FRAGMENT) {
+            if (fragment->pid == process->pid && fragment->load_time > 0) {
+                fragment->load_time -= 1;
+                log_trace("<Scheduler> Loading pages for process %d ETA: %d ticks", process->pid, fragment->load_time);
+            }
+        }
+        current = current->next;
+    }
 }
 
 void log_memory_list(memory_list_t* memoryList) {
@@ -124,6 +153,8 @@ void deallocate_memory_fragment(Node* nodeToFree) {
     memory_fragment_t* fragmentToFree = (memory_fragment_t*) nodeToFree->data;
     fragmentToFree->type = HOLE_FRAGMENT;
     fragmentToFree->pid = -1;
+    fragmentToFree->load_time = -1;
+    fragmentToFree->last_access = -1;
 }
 
 /**
@@ -249,26 +280,30 @@ Node* evict(memory_list_t* memoryList, Node* nodeToEvict) {
  * @param process
  * @param clock
  */
-void allocate_memory(memory_list_t* memoryList, process_t* process, int clock) {
+Node* swapping_allocate_memory(memory_list_t* memoryList, process_t* process) {
     /*
      * Use first fit algorithm to find a fragment large enough for the process
      */
-    Node* freeSpace = first_fit(memoryList, process, clock);
+    Node* freeSpace = first_fit(memoryList, process);
 
     /*
      * If not found, evict the pages belongs to the least recently executed process
      * until a fragment is found.
      */
     while (!freeSpace){
-        log_debug("<MEMORY> Insufficient memory for process t=%d\t requiring %d bytes\n", process->pid, process->memory);
+        log_debug("<MEMORY> Insufficient memory for process %d\t requiring %d bytes", process->pid, process->memory);
         Node* toEvict = find_least_recently_used(memoryList);
-        memory_fragment_t* fragment = (memory_fragment_t*)toEvict->data;
-        log_debug("<MEMORY> Evicting pages for process %d (last access: %d) with %d pages (%d bytes)\n", fragment->pid, fragment->last_access, fragment->page_length, fragment->byte_length);
-        evict(memoryList, toEvict);
-        freeSpace = first_fit(memoryList, process, clock);
-    }
+        if (toEvict) {
+            memory_fragment_t* fragment = (memory_fragment_t*)toEvict->data;
+            log_debug("<MEMORY> Evicting pages for process %d (last access: %d) with %d pages (%d bytes)", fragment->pid, fragment->last_access, fragment->page_length, fragment->byte_length);
+            evict(memoryList, toEvict);
+            freeSpace = first_fit(memoryList, process);
+        } else {
+            return NULL;
+        }
 
-    allocate(memoryList, freeSpace, process);
+    }
+    return allocate(memoryList, freeSpace, process);
 }
 
 /**
@@ -278,7 +313,7 @@ void allocate_memory(memory_list_t* memoryList, process_t* process, int clock) {
  * @param process
  * @param clock
  */
-void use_memory(memory_list_t* memoryList, process_t* process, int clock) {
+void swapping_use_memory(memory_list_t* memoryList, process_t* process, int clock) {
     assert(memoryList && process);
     Node* current = memoryList->list->head;
     while (current) {
@@ -290,7 +325,7 @@ void use_memory(memory_list_t* memoryList, process_t* process, int clock) {
     }
 }
 
-void free_memory(memory_list_t* memoryList, process_t* process, int clock) {
+void swapping_free_memory(memory_list_t* memoryList, process_t* process) {
     assert(memoryList && process);
     Node* current = memoryList->list->head;
     while (current) {

@@ -89,24 +89,28 @@ int readProcessesFromFile(char* fileName, Deque* deque) {
     return count;
 }
 
-void execute(process_t* process, int* clock) {
+void execute(process_t* process, int clock) {
+    static process_t* last = NULL;
     process->jobTime--;
-//    fprintf(stderr, "%d: %d\n", *clock, process->pid);
+    if (process!=last) {
+        log_info("t=%d\t: <Scheduler> process %d start executing", clock, process->pid);
+        last = process;
+    }
 }
 
-int load_process(Deque* pending, Deque* suspended, int* clock) {
+int load_process(Deque* pending, Deque* suspended, int clock) {
     int count = 0;
     heap_t* toAdd = create_heap(MAX_PROCESS_ARRIVAL_PER_TICK, compare_PID);
-    while (deque_size(pending) && next_to_pop(pending)->timeArrived == *clock) {
+    while (deque_size(pending) && next_to_pop(pending)->timeArrived == clock) {
         process_t* process = deque_pop(pending);
-        assert(process->timeArrived == *clock);
+        assert(process->timeArrived == clock);
         heap_insert(toAdd, *process);
-//        fprintf(stderr, "%d\t: Process %d added to suspended\n", *clock, process->pid);
-        freeProcess(process);
+        free_process(process);
     }
 
     while (heap_size(toAdd) > 0) {
         process_t next_process = heap_pop_min(toAdd);
+        log_info("t=%d\t: <Scheduler> Process %d inserted to suspended queue", clock, next_process.pid);
         process_t* next = create_process(next_process.timeArrived, next_process.pid, next_process.memory, next_process.jobTime);
         deque_insert(suspended, next);
         count++;
@@ -141,19 +145,19 @@ int firstComeFirstServe(Deque* processes, int* clock, int* finish) {
     init(processes, pending, suspended);
     while (deque_size(suspended) > 0 || deque_size(pending) > 0) {
         process_t* process = deque_pop(suspended);
-        allocate_memory(memory, process);
-        log_info("<Scheduler> Memory allocated for process %d (%d bytes)", process->pid, process->memory);
+        allocate_memory(memory, process, *clock);
+        log_info("t=%d\t: <Scheduler> Memory allocated for process %d (%d bytes)", *clock, process->pid, process->memory);
         while (process->jobTime > 0) {
-            load_process(pending, suspended, clock);
-            execute(process, clock);
-            use_memory(memory, process, clock);
+            load_process(pending, suspended, *clock);
+            execute(process, *clock);
+            use_memory(memory, process, *clock);
             tick(clock);
         }
         log_memory_list(memory);
         /* A process that has 0 seconds left to run, should be "evicted" from memory before marking the process as
          * finished
          */
-        free_memory(memory, process);
+        free_memory(memory, process, *clock);
         log_memory_list(memory);
         finish_process(process, finish, *clock);
     }
@@ -211,8 +215,8 @@ int shortestRemainingTimeFirst(Deque* processes, int* total, int* clock, int* fi
             process_t* process = deque_pop(pending);
             assert(process->timeArrived == *clock);
             heap_insert(toAdd, *process);
-            freeProcess(process);
-            fprintf(stderr, "%d\t: Process %d added to suspended\n", *clock, process->pid);
+            free_process(process);
+            fprintf(stderr, "t=%d\t: Process %d added to suspended\n", *clock, process->pid);
         }
 
         while (heap_size(toAdd) > 0) {

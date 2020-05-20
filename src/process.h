@@ -16,7 +16,7 @@ process_t* create_process(int timeArrived, int pid, int memory, int jobTime);
 
 void printProcess(process_t* process);
 
-void freeProcess(process_t* process);
+void free_process(process_t* process);
 
 void dlist_free_process(void* process);
 

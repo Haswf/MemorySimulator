@@ -26,7 +26,7 @@ void log_process(process_t* process) {
     log_trace("arrived: %d\tpid: %d\tmemory: %d\tjobTime: %d\n", process->timeArrived, process->pid, process->memory, process->jobTime);
 }
 
-void freeProcess(process_t* process) {
+void free_process(process_t* process) {
     if (!process) {
         free(process);
     }
@@ -37,9 +37,9 @@ void dlist_free_process(void* process) {
 }
 
 void finish_process(process_t* process, int* finish, int clock) {
-    log_info("<Scheduler> Process %d finished at time %d", process->pid, clock);
+    log_info("t=%d\t: <Scheduler> Process %d finished", clock, process->pid);
     *finish += 1;
-    freeProcess(process);
+    free_process(process);
 }
 
 #include "process.h"

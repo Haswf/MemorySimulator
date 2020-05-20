@@ -11,18 +11,19 @@
  *  Testcase for [Process | ToEvict| Process]
  */
 int evict_test_in_PXP() {
+    int clock = 0;
     memory_list_t* mem_list = create_memory_list();
     init_memory_list(mem_list, 1000);
     process_t* process1 = create_process(1, 1, 20, 5);
     process_t* process2 = create_process(1, 2, 800, 5);
     process_t* process3 = create_process(1, 3, 100, 5);
-    Node* after1 = first_fit(mem_list, process1);
+    Node* after1 = first_fit(mem_list, process1, clock);
     Node* allocated1 = allocate(mem_list, after1, process1);
 
-    Node* after2 = first_fit(mem_list, process2);
+    Node* after2 = first_fit(mem_list, process2, clock);
     Node* allocated2 = allocate(mem_list, after2, process2);
 
-    Node* after3 = first_fit(mem_list, process3);
+    Node* after3 = first_fit(mem_list, process3, clock);
     Node* allocate3 = allocate(mem_list, after3, process3);
 
     int oldLength = ((memory_fragment_t*)mem_list->list->head->next->data)->length;
@@ -45,14 +46,14 @@ int evict_test_in_HXP() {
     process_t* process1 = create_process(1, 1, 20, 5);
     process_t* process2 = create_process(1, 2, 800, 5);
     process_t* process3 = create_process(1, 3, 100, 5);
-    Node* after1 = first_fit(mem_list, process1);
+    Node* after1 = first_fit(mem_list, process1, 0);
     Node* allocated1 = allocate(mem_list, after1, process1);
 
-    Node* after2 = first_fit(mem_list, process2);
+    Node* after2 = first_fit(mem_list, process2,0);
     Node* allocated2 = allocate(mem_list, after2, process2);
     evict(mem_list, allocated1);
 
-    Node* after3 = first_fit(mem_list, process3);
+    Node* after3 = first_fit(mem_list, process3, 0);
     Node* allocate3 = allocate(mem_list, after3, process3);
 //    print_memory_list(mem_list);
 //    printf("--------------\n");
@@ -75,13 +76,13 @@ int evict_test_in_PXH() {
     process_t* process1 = create_process(1, 1, 20, 5);
     process_t* process2 = create_process(1, 2, 800, 5);
     process_t* process3 = create_process(1, 3, 100, 5);
-    Node* after1 = first_fit(mem_list, process1);
+    Node* after1 = first_fit(mem_list, process1, 0);
     Node* allocated1 = allocate(mem_list, after1, process1);
 
-    Node* after2 = first_fit(mem_list, process2);
+    Node* after2 = first_fit(mem_list, process2, 0);
     Node* allocated2 = allocate(mem_list, after2, process2);
 
-    Node* after3 = first_fit(mem_list, process3);
+    Node* after3 = first_fit(mem_list, process3,0);
     Node* allocate3 = allocate(mem_list, after3, process3);
 
     Node* merged = evict(mem_list, allocate3);
@@ -98,13 +99,13 @@ int evict_test_in_HXH() {
     process_t* process1 = create_process(1, 1, 20, 5);
     process_t* process2 = create_process(1, 2, 800, 5);
     process_t* process3 = create_process(1, 3, 100, 5);
-    Node* after1 = first_fit(mem_list, process1);
+    Node* after1 = first_fit(mem_list, process1, 0);
     Node* allocated1 = allocate(mem_list, after1, process1);
 
-    Node* after2 = first_fit(mem_list, process2);
+    Node* after2 = first_fit(mem_list, process2, 0);
     Node* allocated2 = allocate(mem_list, after2, process2);
 
-    Node* after3 = first_fit(mem_list, process3);
+    Node* after3 = first_fit(mem_list, process3, 0);
     Node* allocated3 = allocate(mem_list, after3, process3);
 
     evict(mem_list, allocated1);
@@ -127,13 +128,13 @@ int test_use_memory() {
     process_t* process1 = create_process(1, 1, 20, 5);
     process_t* process2 = create_process(1, 2, 800, 5);
     process_t* process3 = create_process(1, 3, 100, 5);
-    Node* after1 = first_fit(mem_list, process1);
+    Node* after1 = first_fit(mem_list, process1, 0);
     Node* allocated1 = allocate(mem_list, after1, process1);
 
-    Node* after2 = first_fit(mem_list, process2);
+    Node* after2 = first_fit(mem_list, process2,0 );
     Node* allocated2 = allocate(mem_list, after2, process2);
 
-    Node* after3 = first_fit(mem_list, process3);
+    Node* after3 = first_fit(mem_list, process3,0);
     Node* allocate3 = allocate(mem_list, after3, process3);
 //    print_memory_list(mem_list);
     //    printf("--------------\n");
@@ -148,13 +149,13 @@ int test_find_least_recently_used() {
     process_t* process1 = create_process(1, 1, 20, 5);
     process_t* process2 = create_process(1, 2, 800, 5);
     process_t* process3 = create_process(1, 3, 100, 5);
-    Node* after1 = first_fit(mem_list, process1);
+    Node* after1 = first_fit(mem_list, process1,0);
     Node* allocated1 = allocate(mem_list, after1, process1);
 
-    Node* after2 = first_fit(mem_list, process2);
+    Node* after2 = first_fit(mem_list, process2,0);
     Node* allocated2 = allocate(mem_list, after2, process2);
 
-    Node* after3 = first_fit(mem_list, process3);
+    Node* after3 = first_fit(mem_list, process3,0);
     Node* allocate3 = allocate(mem_list, after3, process3);
 //    print_memory_list(mem_list);
     //    printf("--------------\n");

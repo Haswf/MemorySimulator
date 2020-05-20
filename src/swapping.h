@@ -13,11 +13,11 @@
 
 typedef struct memory_list {
     Dlist* list;
+    int page_size
 } memory_list_t;
 
 void log_memory_list(memory_list_t* memoryList);
-memory_list_t* create_memory_list();
-void init_memory_list(memory_list_t* memoryList, int mem_size);
+memory_list_t* create_memory_list(int mem_size, int page_size);
 void free_memory_list(memory_list_t* memoryList);
 Node* first_fit(memory_list_t* memoryList, process_t* process, int clock);
 Node* allocate(memory_list_t* memoryList, Node* hole, process_t* process);
@@ -27,4 +27,7 @@ void use_memory(memory_list_t* memoryList, process_t* process, int clock);
 Node* find_least_recently_used(memory_list_t* memoryList);
 void allocate_memory(memory_list_t* memoryList, process_t* process, int clock);
 void free_memory(memory_list_t* memoryList, process_t* process, int clock);
+int byteToRequiredPage(int bytes, int page_size);
+int byteToAvailablePage(int bytes, int page_size);
+
 #endif //SCHEDULER_SWAPPING_H

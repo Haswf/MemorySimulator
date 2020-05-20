@@ -12,8 +12,7 @@
  */
 int evict_test_in_PXP() {
     int clock = 0;
-    memory_list_t* mem_list = create_memory_list();
-    init_memory_list(mem_list, 1000);
+    memory_list_t* mem_list = create_memory_list(1000, 4);
     process_t* process1 = create_process(1, 1, 20, 5);
     process_t* process2 = create_process(1, 2, 800, 5);
     process_t* process3 = create_process(1, 3, 100, 5);
@@ -26,14 +25,14 @@ int evict_test_in_PXP() {
     Node* after3 = first_fit(mem_list, process3, clock);
     Node* allocate3 = allocate(mem_list, after3, process3);
 
-    int oldLength = ((memory_fragment_t*)mem_list->list->head->next->data)->length;
-    int oldStart = ((memory_fragment_t*)mem_list->list->head->next->data)->start;
+    int oldLength = ((memory_fragment_t*)mem_list->list->head->next->data)->byte_length;
+    int oldStart = ((memory_fragment_t*)mem_list->list->head->next->data)->byte_length;
 
     evict(mem_list, allocated2);
     assert(((memory_fragment_t*)mem_list->list->head->next->data)->type == HOLE_FRAGMENT);
     assert(((memory_fragment_t*)mem_list->list->head->next->data)->pid == -1);
-    assert(((memory_fragment_t*)mem_list->list->head->next->data)->length == oldLength);
-    assert(((memory_fragment_t*)mem_list->list->head->next->data)->start == oldStart);
+    assert(((memory_fragment_t*)mem_list->list->head->next->data)->byte_length == oldLength);
+    assert(((memory_fragment_t*)mem_list->list->head->next->data)->byte_length == oldStart);
 }
 
 /*
@@ -41,8 +40,7 @@ int evict_test_in_PXP() {
  * expected output: [...| Hole | Process]
  */
 int evict_test_in_HXP() {
-    memory_list_t* mem_list = create_memory_list();
-    init_memory_list(mem_list, 1000);
+    memory_list_t* mem_list = create_memory_list(1000, 4);
     process_t* process1 = create_process(1, 1, 20, 5);
     process_t* process2 = create_process(1, 2, 800, 5);
     process_t* process3 = create_process(1, 3, 100, 5);
@@ -62,8 +60,8 @@ int evict_test_in_HXP() {
     memory_fragment_t* freeSpace = (memory_fragment_t*) merged->data;
     assert(freeSpace->type == HOLE_FRAGMENT);
     assert(freeSpace->pid == -1);
-    assert(freeSpace->length == 820);
-    assert(freeSpace->start == 0);
+    assert(freeSpace->byte_length == 820);
+    assert(freeSpace->byte_start == 0);
 }
 
 /*
@@ -71,8 +69,7 @@ int evict_test_in_HXP() {
  * expected output: [...| Process | Hole]
  */
 int evict_test_in_PXH() {
-    memory_list_t* mem_list = create_memory_list();
-    init_memory_list(mem_list, 1000);
+    memory_list_t* mem_list = create_memory_list(1000, 4);
     process_t* process1 = create_process(1, 1, 20, 5);
     process_t* process2 = create_process(1, 2, 800, 5);
     process_t* process3 = create_process(1, 3, 100, 5);
@@ -89,13 +86,12 @@ int evict_test_in_PXH() {
     memory_fragment_t* freeSpace = (memory_fragment_t*) merged->data;
     assert(freeSpace->type == HOLE_FRAGMENT);
     assert(freeSpace->pid == -1);
-    assert(freeSpace->length == 180);
-    assert(freeSpace->start == 820);
+    assert(freeSpace->byte_length == 180);
+    assert(freeSpace->byte_start == 820);
 }
 
 int evict_test_in_HXH() {
-    memory_list_t* mem_list = create_memory_list();
-    init_memory_list(mem_list, 1000);
+    memory_list_t* mem_list = create_memory_list(1000, 4);
     process_t* process1 = create_process(1, 1, 20, 5);
     process_t* process2 = create_process(1, 2, 800, 5);
     process_t* process3 = create_process(1, 3, 100, 5);
@@ -118,13 +114,12 @@ int evict_test_in_HXH() {
     memory_fragment_t* freeSpace = (memory_fragment_t*) merged->data;
     assert(freeSpace->type == HOLE_FRAGMENT);
     assert(freeSpace->pid == -1);
-    assert(freeSpace->length == 1000);
-    assert(freeSpace->start == 0);
+    assert(freeSpace->byte_length == 1000);
+    assert(freeSpace->byte_start == 0);
 }
 
 int test_use_memory() {
-    memory_list_t* mem_list = create_memory_list();
-    init_memory_list(mem_list, 1000);
+    memory_list_t* mem_list = create_memory_list(1000, 4);
     process_t* process1 = create_process(1, 1, 20, 5);
     process_t* process2 = create_process(1, 2, 800, 5);
     process_t* process3 = create_process(1, 3, 100, 5);
@@ -144,8 +139,7 @@ int test_use_memory() {
 }
 
 int test_find_least_recently_used() {
-    memory_list_t* mem_list = create_memory_list();
-    init_memory_list(mem_list, 1000);
+    memory_list_t* mem_list = create_memory_list(1000, 4);
     process_t* process1 = create_process(1, 1, 20, 5);
     process_t* process2 = create_process(1, 2, 800, 5);
     process_t* process3 = create_process(1, 3, 100, 5);

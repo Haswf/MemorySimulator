@@ -24,7 +24,9 @@
 #define SWAPPING -2
 #define VIRTUAL_MEMORY -3
 #define CUSTOMISED_MEMORY -4
-#define LOG_LEVEL LOG_DEBUG
+#define LOG_LEVEL LOG_INFO
+//#define LOG_LEVEL LOG_DEBUG
+//#define LOG_LEVEL LOG_TRACE
 
 #include "log.h"
 

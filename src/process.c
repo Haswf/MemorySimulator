@@ -37,7 +37,7 @@ void dlist_free_process(void* process) {
 }
 
 void finish_process(process_t* process, int* finish, int clock) {
-    log_info("t=%d\t: <Scheduler> Process %d finished", clock, process->pid);
+    log_info("<Scheduler> Process %d finished",process->pid);
     *finish += 1;
     free_process(process);
 }

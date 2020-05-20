@@ -43,7 +43,7 @@ void heapify_bottom_top(heap_t *h,int index){
     data temp;
     int parent_node = (index-1)/2;
 
-    if (h->cmp(&(h->arr[parent_node]), &(h->arr[index]))){
+    if (h->cmp(&(h->arr[parent_node]), &(h->arr[index])) > 0){
         //swap and recursive call
         temp = h->arr[parent_node];
         h->arr[parent_node] = h->arr[index];

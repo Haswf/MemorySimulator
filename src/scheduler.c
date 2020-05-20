@@ -117,7 +117,7 @@ int load_process(Deque* pending, Deque* suspended, int clock) {
 
     while (heap_size(toAdd) > 0) {
         process_t next_process = heap_pop_min(toAdd);
-        log_info("<Scheduler> Process %d inserted to suspended queue", clock, next_process.pid);
+        log_info("<Scheduler> Process %d inserted to suspended queue", next_process.pid);
         process_t* next = create_process(next_process.timeArrived, next_process.pid, next_process.memory, next_process.jobTime);
         deque_insert(suspended, next);
         count++;
@@ -148,8 +148,14 @@ int firstComeFirstServe(memory_allocator_t* allocator, Deque* processes, int* cl
     Deque *pending = new_deque();
 
     init(processes, pending, suspended);
+
     while (deque_size(suspended) > 0 || deque_size(pending) > 0) {
         load_process(pending, suspended, *clock);
+        // continue if there is no process ready to run
+        if (deque_size(suspended) == 0) {
+            tick(clock);
+            continue;
+        }
         process_t* process = deque_pop(suspended);
 
         if (allocator->load_time_left(allocator->structure, process) < 0) {
@@ -167,6 +173,7 @@ int firstComeFirstServe(memory_allocator_t* allocator, Deque* processes, int* cl
             } else {
                 execute(process);
                 allocator->use_memory(allocator->structure, process, *clock);
+
             }
             load_process(pending, suspended, *clock);
             tick(clock);
@@ -186,6 +193,11 @@ int roundRobin(memory_allocator_t* allocator, Deque* processes, int* clock, int*
 
     while (deque_size(suspended) > 0 || deque_size(pending) > 0) {
         load_process(pending, suspended, *clock);
+        // continue if there is no process ready to run
+        if (deque_size(suspended) == 0) {
+            tick(clock);
+            continue;
+        }
         int quantumLeft = quantum;
         process_t* process = deque_pop(suspended);
         // Allocate space for the process if it's not in the memory
@@ -207,6 +219,7 @@ int roundRobin(memory_allocator_t* allocator, Deque* processes, int* clock, int*
                 allocator->use_memory(allocator->structure, process, *clock);
                 quantumLeft--;
             }
+            load_process(pending, suspended, *clock);
             tick(clock);
         }
         if (process->jobTime > 0) {
@@ -224,7 +237,7 @@ int compare_job_time(void * a, void * b) {
 }
 
 int compare_PID(void * a, void * b) {
-    return ((process_t *)a)->pid - ((process_t*)b)->pid;
+    return (((process_t *)a)->pid - ((process_t*)b)->pid);
 }
 
 
@@ -248,16 +261,17 @@ int shortestRemainingTimeFirst(memory_allocator_t* allocator, Deque* processes, 
             assert(process->timeArrived == *clock);
             heap_insert(toAdd, *process);
             free_process(process);
-            log_info("Process %d added to suspended", *clock, process->pid);
+            log_info("Process %d added to suspended", process->pid);
         }
         while (heap_size(toAdd) > 0) {
             process_t next = heap_pop_min(toAdd);
             heap_insert(suspended, next);
         }
         if (heap_size(suspended) > 0) {
+            heap_print(suspended, printProcess);
             process_t running = heap_pop_min(suspended);
             process_t* process = &running;
-            log_debug("<Scheduler> Next process to execute is %d", process->pid);
+            log_debug("<Scheduler> Next process to execute is %d (%d ticks remaining)", process->pid, process->jobTime);
             if (allocator->load_time_left(allocator->structure, process) < 0){
                 void* allocation = allocator->allocate_memory(allocator->structure, process);
                 if (!allocation){

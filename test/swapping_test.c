@@ -30,7 +30,7 @@ int evict_test_in_PXP() {
 
     evict(mem_list, allocated2);
     assert(((memory_fragment_t*)mem_list->list->head->next->data)->type == HOLE_FRAGMENT);
-    assert(((memory_fragment_t*)mem_list->list->head->next->data)->process == NULL);
+    assert(((memory_fragment_t*)mem_list->list->head->next->data)->pid == -1);
     assert(((memory_fragment_t*)mem_list->list->head->next->data)->length == oldLength);
     assert(((memory_fragment_t*)mem_list->list->head->next->data)->start == oldStart);
 }
@@ -60,7 +60,7 @@ int evict_test_in_HXP() {
 //    print_memory_list(mem_list);
     memory_fragment_t* freeSpace = (memory_fragment_t*) merged->data;
     assert(freeSpace->type == HOLE_FRAGMENT);
-    assert(freeSpace->process == NULL);
+    assert(freeSpace->pid == -1);
     assert(freeSpace->length == 820);
     assert(freeSpace->start == 0);
 }
@@ -87,7 +87,7 @@ int evict_test_in_PXH() {
     Node* merged = evict(mem_list, allocate3);
     memory_fragment_t* freeSpace = (memory_fragment_t*) merged->data;
     assert(freeSpace->type == HOLE_FRAGMENT);
-    assert(freeSpace->process == NULL);
+    assert(freeSpace->pid == -1);
     assert(freeSpace->length == 180);
     assert(freeSpace->start == 820);
 }
@@ -116,7 +116,7 @@ int evict_test_in_HXH() {
 
     memory_fragment_t* freeSpace = (memory_fragment_t*) merged->data;
     assert(freeSpace->type == HOLE_FRAGMENT);
-    assert(freeSpace->process == NULL);
+    assert(freeSpace->pid == -1);
     assert(freeSpace->length == 1000);
     assert(freeSpace->start == 0);
 }

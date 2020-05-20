@@ -29,6 +29,8 @@
 // DO NOT CHANGE THIS FUNCTION SIGNATURE
 Deque *new_deque() {
     Deque *newdq = (Deque*)malloc(sizeof(Deque));
+    /* We don't want the linked list to free data it contains in this case,
+     * so a empty cleaner is provided */
     newdq->list = new_dlist(empty_cleaner);
     return newdq;
 }

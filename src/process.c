@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+
 process_t* create_process(int timeArrived, int pid, int memory, int jobTime) {
     process_t* newProcess = (process_t*)malloc(sizeof(*newProcess));
     if (newProcess == NULL) {
@@ -21,11 +22,24 @@ void printProcess(process_t* process) {
     fprintf(stderr, "arrived: %d\tpid: %d\tmemory: %d\tjobTime: %d\n", process->timeArrived, process->pid, process->memory, process->jobTime);
 }
 
+void log_process(process_t* process) {
+    log_trace("arrived: %d\tpid: %d\tmemory: %d\tjobTime: %d\n", process->timeArrived, process->pid, process->memory, process->jobTime);
+}
+
 void freeProcess(process_t* process) {
-    if (process == NULL) {
-        return;
+    if (!process) {
+        free(process);
     }
+}
+
+void dlist_free_process(void* process) {
     free(process);
+}
+
+void finish_process(process_t* process, int* finish, int clock) {
+    log_info("<Scheduler> Process %d finished at time %d", process->pid, clock);
+    *finish += 1;
+    freeProcess(process);
 }
 
 #include "process.h"

@@ -15,6 +15,7 @@ typedef struct memory_list {
     Dlist* list;
 } memory_list_t;
 
+void log_memory_list(memory_list_t* memoryList);
 memory_list_t* create_memory_list();
 void init_memory_list(memory_list_t* memoryList, int mem_size);
 void free_memory_list(memory_list_t* memoryList);
@@ -25,4 +26,5 @@ Node* evict(memory_list_t* memoryList, Node* nodeToEvict);
 void use_memory(memory_list_t* memoryList, process_t* process, int* clock);
 Node* find_least_recently_used(memory_list_t* memoryList);
 void allocate_memory(memory_list_t* memoryList, process_t* process);
+void free_memory(memory_list_t* memoryList, process_t* process);
 #endif //SCHEDULER_SWAPPING_H

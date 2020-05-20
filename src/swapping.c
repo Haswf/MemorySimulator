@@ -1,7 +1,6 @@
 //
 // Created by Haswell on 18/05/2020.
 //
-
 #include "swapping.h"
 #include "../test/swapping_test.h"
 
@@ -29,6 +28,8 @@ Node* first_fit(memory_list_t* memoryList, process_t* process) {
     while (current) {
         memory_fragment_t* fragment = (memory_fragment_t*) current->data;
         if (fragment->type == HOLE_FRAGMENT && fragment->length > process->memory) {
+            log_debug("<MEMORY> First fit for pid %d (%d bytes) is at %d", process->pid, process->memory, fragment->start);
+            log_fragment(fragment);
             return current;
         }
         current = current->next;
@@ -45,8 +46,16 @@ Node* allocate(memory_list_t* memoryList, Node* hole, process_t* process) {
 
     fragment->length = process->memory;
     fragment->type = PROCESS_FRAGMENT;
-    fragment->process = process;
+    fragment->pid = process->pid;
     return hole;
+}
+
+void log_memory_list(memory_list_t* memoryList) {
+    Node* current = memoryList->list->head;
+    while (current) {
+        log_fragment(current->data);
+        current = current -> next;
+    }
 }
 
 void print_memory_list(memory_list_t* memoryList) {
@@ -59,7 +68,7 @@ void print_memory_list(memory_list_t* memoryList) {
 void free_memory_fragment(Node* nodeToFree) {
     memory_fragment_t* fragmentToFree = (memory_fragment_t*) nodeToFree->data;
     fragmentToFree->type = HOLE_FRAGMENT;
-    fragmentToFree->process = NULL;
+    fragmentToFree->pid = -1;
 }
 
 Node* join_prev(memory_list_t* memoryList, Node* nodeToEvict) {
@@ -84,9 +93,13 @@ Node* join_next(memory_list_t* memoryList, Node* nodeToEvict) {
     return merged;
 }
 
+/**
+ * @param memoryList
+ * @return
+ */
 Node* find_least_recently_used(memory_list_t* memoryList) {
     Node* current = memoryList->list->head;
-    memory_fragment_t* fragment = (memory_fragment_t*)current->data;
+    memory_fragment_t* fragment = NULL;
     Node* nodeToSwap = NULL;
     int minLastAccess;
 
@@ -130,10 +143,10 @@ Node* evict(memory_list_t* memoryList, Node* nodeToEvict) {
 void allocate_memory(memory_list_t* memoryList, process_t* process) {
     Node* freeSpace = first_fit(memoryList, process);
     while (!freeSpace){
-        fprintf(stderr, "Insufficient memory for process %d\t requiring %d bytes\n", process->pid, process->memory);
+        log_debug("<MEMORY> Insufficient memory for process %d\t requiring %d bytes\n", process->pid, process->memory);
         Node* toEvict = find_least_recently_used(memoryList);
         memory_fragment_t* fragment = (memory_fragment_t*)toEvict->data;
-        fprintf(stderr, "Evicting pages for process %d (last access: %d) with %d bytes\n", fragment->process->pid, fragment->last_access, fragment->process->memory);
+        log_debug("<MEMORY> Evicting pages for process %d (last access: %d) with %d bytes\n", fragment->pid, fragment->last_access, fragment->length);
         evict(memoryList, toEvict);
         freeSpace = first_fit(memoryList, process);
     }
@@ -145,14 +158,27 @@ void use_memory(memory_list_t* memoryList, process_t* process, int* clock) {
     Node* current = memoryList->list->head;
     while (current) {
         memory_fragment_t* fragment = (memory_fragment_t*)current->data;
-        if (fragment->type == PROCESS_FRAGMENT && fragment->process->pid == process->pid) {
+        if (fragment->type == PROCESS_FRAGMENT && fragment->pid == process->pid) {
             fragment->last_access = *clock;
         }
         current = current->next;
     }
 }
 
-//int main(){
-//   evict_test();
-//
-//}
+void free_memory(memory_list_t* memoryList, process_t* process) {
+    assert(memoryList && process);
+    Node* current = memoryList->list->head;
+    while (current) {
+        memory_fragment_t* fragment = (memory_fragment_t*)current->data;
+        if (fragment->type == PROCESS_FRAGMENT && fragment->pid == process->pid) {
+            log_debug("<MEMORY> Free memory allocated for process %d (%d bytes)", process->pid, process->memory);
+            log_trace("-------------before-----------\n");
+            log_memory_list(memoryList);
+            evict(memoryList, current);
+            log_trace("-------------after------------\n");
+            log_memory_list(memoryList);
+            return;
+        }
+        current = current->next;
+    }
+}

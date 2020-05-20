@@ -3,8 +3,8 @@
 //
 
 #include "scheduler.h"
-
-
+#include "log.h"
+#include "log.c"
 void parseFileName(char** file, int index, int argc, char *argv[]) {
     if (strstr(argv[index], "-f") && index+1 < argc) {
         *file = argv[index+1];
@@ -117,10 +117,6 @@ int load_process(Deque* pending, Deque* suspended, int* clock) {
 void tick(int* clock) {
     *clock = *clock+1;
 }
-void finishProcess(process_t* process, int* finish) {
-    *finish += 1;
-    freeProcess(process);
-}
 
 int init(Deque* processes, Deque* pending, Deque* suspended) {
     while (deque_size(processes) > 0) {
@@ -134,7 +130,7 @@ int init(Deque* processes, Deque* pending, Deque* suspended) {
 };
 
 
-int firstComeFirstServe(Deque* processes, int* clock, Deque* finish) {
+int firstComeFirstServe(Deque* processes, int* clock, int* finish) {
     memory_list_t* memory = create_memory_list();
     init_memory_list(memory, 1000);
 
@@ -146,17 +142,20 @@ int firstComeFirstServe(Deque* processes, int* clock, Deque* finish) {
     while (deque_size(suspended) > 0 || deque_size(pending) > 0) {
         process_t* process = deque_pop(suspended);
         allocate_memory(memory, process);
-        fprintf(stderr, "Allocating Memory for process %d (%d bytes)\n", process->pid, process->memory);
-//        print_memory_list(memory);
-//        printf("------------\n");
+        log_info("<Scheduler> Memory allocated for process %d (%d bytes)", process->pid, process->memory);
         while (process->jobTime > 0) {
             load_process(pending, suspended, clock);
             execute(process, clock);
             use_memory(memory, process, clock);
             tick(clock);
         }
-        deque_push(finish, process);
-//        finishProcess(process, finish);
+        log_memory_list(memory);
+        /* A process that has 0 seconds left to run, should be "evicted" from memory before marking the process as
+         * finished
+         */
+        free_memory(memory, process);
+        log_memory_list(memory);
+        finish_process(process, finish, *clock);
     }
 }
 
@@ -177,7 +176,7 @@ int roundRobin(Deque* processes, int* clock,  int* finish, int quantum) {
         if (process->jobTime > 0) {
             deque_insert(suspended, process);
         } else {
-            finishProcess(process, finish);
+            finish_process(process, finish, *clock);
         }
     }
 }
@@ -246,6 +245,7 @@ int main(int argc, char *argv[]) {
     int memorySize = -1;
     int quantum = 10;
     int total = 0;
+    log_set_level(LOG_DEBUG);
 
     for (int i = 1; i < argc; i++) {
         parseFileName(&fileName, i, argc, argv);
@@ -257,7 +257,7 @@ int main(int argc, char *argv[]) {
     inspectArguments(fileName, schedulingAlgorithm, memoryAllocation, memorySize, quantum);
 
     Deque *processes = new_deque();
-    Deque *finished = new_deque();
+    int finished = 0;
     total = readProcessesFromFile(fileName, processes);
 
     int clock = 0;

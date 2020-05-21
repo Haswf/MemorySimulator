@@ -2,6 +2,7 @@
 // Created by Haswell on 18/05/2020.
 //
 #include "swapping.h"
+#include "memory_fragment.h"
 #include "../test/swapping_test.h"
 
 /**
@@ -14,7 +15,7 @@ memory_list_t* create_memory_list(int mem_size, int page_size) {
     memory_list_t* m_list = (memory_list_t*)malloc(sizeof(*m_list));
     assert(m_list);
     m_list->page_size = page_size;
-    m_list->list = new_dlist(dlist_free_fragment);
+    m_list->list = new_dlist(dlist_free_fragment, (void (*)(void *)) print_fragment);
     assert(m_list->list);
     /* The first process is always given a memory page 0*/
     memory_fragment_t* empty_memory = create_hole_fragment(0, 0, mem_size, byteToAvailablePage(mem_size, page_size));
@@ -49,7 +50,7 @@ Node* first_fit(memory_list_t* memoryList, process_t* process) {
     Node* current = memoryList->list->head;
     while (current) {
         memory_fragment_t* fragment = (memory_fragment_t*) current->data;
-        if (fragment->type == HOLE_FRAGMENT && fragment->page_length > pages_required) {
+        if (fragment->type == HOLE_FRAGMENT && fragment->page_length >= pages_required) {
             log_debug("<MEMORY> First fit for pid %d (%d pages) is at %d", process->pid, pages_required, fragment->page_start);
             return current;
         }
@@ -351,11 +352,11 @@ int swapping_require_allocation(memory_list_t* memoryList, process_t* process) {
     while (current) {
         memory_fragment_t* fragment = (memory_fragment_t*)current->data;
         if (fragment->type == PROCESS_FRAGMENT && fragment->pid == process->pid) {
-            return false;
+            return 0;
         }
         current = current->next;
     }
-    return true;
+    return -1;
 }
 
 memory_allocator_t* create_swapping_allocator(int memory_size, int page_size) {

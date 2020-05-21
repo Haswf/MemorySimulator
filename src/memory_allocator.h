@@ -15,7 +15,7 @@ typedef struct memory_allocator {
     void (*free_memory)(void*, process_t*);
     void (*load_memory)(void* memoryList, process_t* process);
     int (*load_time_left)(void* memoryList, process_t* process);
-    bool (*require_allocation)(void* memoryList, process_t* process);
+    int (*require_allocation)(void* memoryList, process_t* process);
     void* structure;
 } memory_allocator_t;
 

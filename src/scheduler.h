@@ -22,6 +22,7 @@
 int compare_PID(void * a, void * b);
 
 int firstComeFirstServe(memory_allocator_t* allocator, Deque* processes, int* clock, int* finish);
+void execute(process_t* process, int clock);
 
 #define MAX_PROCESS_ARRIVAL_PER_TICK 100
 #endif //COMP30023_2020_PROJECT_2_SCHEDULER_H

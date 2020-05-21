@@ -25,12 +25,13 @@ struct dlist {
     Node *tail;
     int size;
     void (*clean)(void *);
+    void (*print)(void *);
 };
 
 // Dlist Creation and deletion
 
 // helper function to create a new dlist and return its address
-Dlist* new_dlist(void (*clean)(void *));
+Dlist* new_dlist(void (*clean)(void *), void (*print)(void *));
 
 //free a dlist node by node
 void free_dlist(Dlist *ddl);
@@ -71,5 +72,7 @@ Node* dlist_remove(Dlist *ddl, Node* toRemove);
 int dlist_test();
 
 void empty_cleaner(void* data);
+
+void print_dlist(Dlist* list);
 
 #endif //DLIST_H

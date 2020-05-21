@@ -19,7 +19,7 @@ void unlimited_load_memory(void* structure, process_t* process) {
 
 };
 int unlimited_require_allocation(void* structure, process_t* process) {
-    return false;
+    return 0;
 }
 memory_allocator_t* create_unlimited_allocator() {
     memory_allocator_t* allocator = malloc(sizeof(*allocator));

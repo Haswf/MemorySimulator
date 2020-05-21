@@ -14,9 +14,10 @@ void empty_cleaner(void* data) {
 
 }
 // helper function to create a new dlist and return its address
-Dlist* new_dlist(void (*clean)(void *)){
+Dlist* new_dlist(void (*clean)(void *), void (*print)(void *)){
     Dlist *new = malloc(sizeof(Dlist));
     assert(new);
+    new->print = print;
     new->head = NULL;
     new->tail = NULL;
     new->size = 0;
@@ -24,6 +25,15 @@ Dlist* new_dlist(void (*clean)(void *)){
     return new;
 }
 
+void print_dlist(Dlist* list) {
+    Node *curr = list->head;
+    // free list node by node
+    while (curr) {
+        // record next node
+        list->print(curr->data);
+        curr = curr->next;
+    }
+}
 // free a dlist node by node
 void free_dlist(Dlist *ddl) {
     assert(ddl != NULL);

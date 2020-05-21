@@ -28,7 +28,7 @@ struct deque {
 // Create a new empty Deque and return a pointer to it
 //
 // DO NOT CHANGE THIS FUNCTION SIGNATURE
-Deque *new_deque();
+Deque *new_deque(void (*print)(void *));
 
 // Free the memory associated with a Deque
 //
@@ -81,6 +81,7 @@ tNode* last_to_pop(Deque *deque);
 
 tNode* next_to_pop(Deque *deque);
 
+void print_deque(Deque *deque);
 
 #endif
 

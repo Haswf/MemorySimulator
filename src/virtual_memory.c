@@ -11,7 +11,7 @@ page_table_node_t* create_page_table_node(int pid, int page_count) {
     page->page_count = page_count;
     page->pid = pid;
     page->valid_page_count = 0;
-    page->loading_time_left = -1;
+    page->loading_time_left = 0;
     page->page_table_pointer = malloc(sizeof(*page->page_table_pointer) * page_count);
     assert(page->page_table_pointer);
     page->last_access = -1;
@@ -78,7 +78,7 @@ virtual_memory_t* create_virtual_memory(int memory_size, int page_size) {
     memory->page_size = page_size;
     memory->total_frame = memory_size/page_size;
     memory->free_frame = memory_size/page_size;
-    memory->page_tables = new_dlist(dlist_free_page_table_node);
+    memory->page_tables = new_dlist(dlist_free_page_table_node, (void (*)(void *)) print_page_table);
     memory->page_frames = (int*)malloc(sizeof(memory->page_frames) * memory->total_frame);
     init_memory(memory->page_frames, memory->total_frame);
     return memory;
@@ -104,23 +104,29 @@ page_table_node_t* get_page_table(virtual_memory_t* memory_manager, process_t* p
 }
 
 void virtual_memory_allocate_memory(virtual_memory_t* memory_manager, process_t* process) {
+    /* Find the minimum number of pages required to execute this process */
+    int page_required = byteToRequiredPage(process->memory, memory_manager->page_size);
+    int allocation_target = page_required>MIN_PAGE_REQUIRED_TO_RUN?MIN_PAGE_REQUIRED_TO_RUN: page_required;
     page_table_node_t* allocated = get_page_table(memory_manager, process);
-    if (allocated && allocated->valid_page_count > MIN_PAGE_REQUIRED_TO_RUN) {
+    /* If enough page has been allocated in memory, just return*/
+    if (allocated && allocated->valid_page_count >= page_required) {
         log_trace("<Memory> process %d has %d/%d pages in memory. No new allocation is needed.", process->pid, allocated->valid_page_count, allocated->page_count);
         return;
     }
-    int page_required = byteToRequiredPage(process->memory, memory_manager->page_size);
-    int allocation_target = page_required>MIN_PAGE_REQUIRED_TO_RUN?MIN_PAGE_REQUIRED_TO_RUN: page_required;
+    /* Create a page table for the process if not exist */
+    if (!allocated) {
+        allocated = create_page_table_node(process->pid, page_required);
+    }
+
     log_trace("<Memory> Minimum allocation for process %d is %d pages", process->pid, allocation_target);
     int newly_allocated = 0;
-    page_table_node_t* new_page_table = create_page_table_node(process->pid, page_required);
 
-    while (new_page_table->valid_page_count < allocation_target){
-        while (memory_manager->free_frame > 0 && new_page_table->valid_page_count < new_page_table->page_count) {
+    while (allocated->valid_page_count < allocation_target){
+        while (memory_manager->free_frame > 0 && allocated->valid_page_count < allocated->page_count) {
             for (int i=0; i<memory_manager->total_frame; i++) {
                 if (memory_manager->page_frames[i] < 0){
                     memory_manager->page_frames[i] = process->pid;
-                    allocate_page(new_page_table, i);
+                    allocate_page(allocated, i);
                     memory_manager->free_frame-=1;
                     newly_allocated++;
                     // Break the inner for loop to check if enough memory has been allocated
@@ -128,18 +134,18 @@ void virtual_memory_allocate_memory(virtual_memory_t* memory_manager, process_t*
                 }
             }
         }
-        if (memory_manager->free_frame == 0 && new_page_table->valid_page_count < allocation_target) {
+        if (memory_manager->free_frame == 0 && allocated->valid_page_count < allocation_target) {
             page_table_node_t* page = find_least_recently_executed_process(memory_manager, process);
             assert(page->pid != process->pid);
             deallocate_one_page(memory_manager, page);
         }
     }
     /* Calculate loading time based on how many page has been allocated */
-    new_page_table->loading_time_left = LOADING_TIME_PER_PAGE * newly_allocated;
-    log_trace("<Memory> %d/%d pages allocated for process %d. Loading requires %d ticks", newly_allocated, new_page_table->page_count, process->pid, new_page_table->loading_time_left);
+    allocated->loading_time_left += LOADING_TIME_PER_PAGE * newly_allocated;
+    log_trace("<Memory> %d/%d pages allocated for process %d. Loading requires %d ticks", newly_allocated, allocated->page_count, process->pid, allocated->loading_time_left);
     // Add the page table to the linked list. This avoids the case where the newly created table happens to be the
     // least recently executed b/c the default last access time is -1
-    dlist_add_end(memory_manager->page_tables, new_page_table);
+    dlist_add_end(memory_manager->page_tables, allocated);
 }
 
 /**
@@ -154,7 +160,7 @@ page_table_node_t* find_least_recently_executed_process(virtual_memory_t* memory
     Node* current = memory_manager->page_tables->head;
     while (current) {
         page_table_node_t* page_table = (page_table_node_t*)current->data;
-        if (page_table->last_access < max_time && page_table->pid != process->pid && page_table->valid_page_count > 0) {
+        if (page_table->pid != process->pid && page_table->valid_page_count > 0 && page_table->last_access < max_time) {
             max_time = page_table->last_access;
             page_table_to_return = page_table;
         }
@@ -240,12 +246,17 @@ int virtual_memory_free_memory(virtual_memory_t* memory_manager, process_t* proc
 int virtual_require_allocation(virtual_memory_t* memory_manager, process_t* process) {
     page_table_node_t* page_table = get_page_table(memory_manager, process);
     int page_required = byteToRequiredPage(process->memory, memory_manager->page_size);
-    int allocation_target = page_required>MIN_PAGE_REQUIRED_TO_RUN?MIN_PAGE_REQUIRED_TO_RUN: page_required;
-    if (page_table && page_table->valid_page_count > allocation_target) {
-        return false;
+    int allocation_target = page_required>MIN_PAGE_REQUIRED_TO_RUN?MIN_PAGE_REQUIRED_TO_RUN:page_required ;
+    if (page_table) {
+        if (page_table->valid_page_count >= allocation_target) {
+            return 0;
+        }
+        else {
+            return allocation_target - page_table->valid_page_count;
+        }
     }
     else {
-        return true;
+        return -1;
     }
 }
 int virtual_load_time_left(virtual_memory_t* memory_manager, process_t* process) {
@@ -262,7 +273,8 @@ memory_allocator_t* create_virtual_memory_allocator(int memory_size, int page_si
     allocator->free_memory = (void (*)(void *, process_t *)) virtual_memory_free_memory;
     allocator->load_memory = (void (*)(void *, process_t *)) virtual_memory_load_process;
     allocator->load_time_left = (int (*)(void *, process_t *)) virtual_load_time_left;
-    allocator->require_allocation = (int (*)(void *, process_t *)) virtual_require_allocation;
+    allocator->require_allocation = (int (*)(void *, process_t *)) (int (*)(void *,
+                                                                             process_t *)) virtual_require_allocation;
     // Unlimited allocator doesn't have a structure to manage memory;
     allocator->structure = create_virtual_memory(memory_size, page_size);
     return allocator;

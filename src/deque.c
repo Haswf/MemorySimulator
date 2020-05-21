@@ -27,11 +27,11 @@
 // Create a new empty Deque and return a pointer to it
 //
 // DO NOT CHANGE THIS FUNCTION SIGNATURE
-Deque *new_deque() {
+Deque *new_deque(void (*print)(void *)) {
     Deque *newdq = (Deque*)malloc(sizeof(Deque));
     /* We don't want the linked list to free data it contains in this case,
      * so a empty cleaner is provided */
-    newdq->list = new_dlist(empty_cleaner);
+    newdq->list = new_dlist(empty_cleaner, print);
     return newdq;
 }
 
@@ -75,6 +75,10 @@ void deque_insert(Deque *deque, tNode* data) {
 tNode* deque_pop(Deque *deque) {
     // TODO: Implement deque_pop()
     return dlist_remove_end(deque->list);
+}
+
+void print_deque(Deque *deque){
+    print_dlist(deque->list);
 }
 
 tNode* last_to_pop(Deque *deque) {

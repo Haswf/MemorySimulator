@@ -4,8 +4,7 @@
 
 #include "memory_fragment.h"
 
-#include <stdlib.h>
-#include <stdio.h>
+
 
 
 memory_fragment_t* create_hole_fragment(int byte_start, int page_start, int byte_length, int page_length) {

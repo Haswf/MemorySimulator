@@ -4,11 +4,13 @@
 
 #ifndef COMP30023_2020_PROJECT_2_MEMORY_FRAGMENT_H
 #define COMP30023_2020_PROJECT_2_MEMORY_FRAGMENT_H
-#define HOLE_FRAGMENT 5
-#define PROCESS_FRAGMENT 6
+
 #include "process.h"
 #include "log.h"
-#define LOADING_TIME_PER_PAGE 2
+#include <stdlib.h>
+#include <stdio.h>
+#include "constants.h"
+
 
 typedef struct memory_fragment {
     int type;

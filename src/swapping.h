@@ -4,13 +4,15 @@
 
 #ifndef SCHEDULER_SWAPPING_H
 #define SCHEDULER_SWAPPING_H
+
 #include "dlist.h"
 #include "dlist.h"
-#include "stdlib.h"
-#include "assert.h"
+#include <stdlib.h>
+#include <assert.h>
 #include "memory_fragment.h"
-#include "stdio.h"
-#include "stdbool.h"
+#include <stdio.h>
+#include <stdbool.h>
+#include "memory_allocator.h"
 
 typedef struct memory_list {
     Dlist* list;
@@ -32,5 +34,6 @@ void swapping_free_memory(memory_list_t* memoryList, process_t* process);
 int byteToRequiredPage(int bytes, int page_size);
 int byteToAvailablePage(int bytes, int page_size);
 void swapping_load_memory(memory_list_t* memoryList, process_t* process);
+memory_allocator_t* create_swapping_allocator(int memory_size, int page_size);
 
 #endif //SCHEDULER_SWAPPING_H

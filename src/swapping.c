@@ -3,6 +3,7 @@
 //
 #include "swapping.h"
 #include "../test/swapping_test.h"
+
 /**
  * Create a memory list
  * @param mem_size total memory size
@@ -342,4 +343,31 @@ void swapping_free_memory(memory_list_t* memoryList, process_t* process) {
         }
         current = current->next;
     }
+}
+
+int swapping_require_allocation(memory_list_t* memoryList, process_t* process) {
+    assert(memoryList && process);
+    Node* current = memoryList->list->head;
+    while (current) {
+        memory_fragment_t* fragment = (memory_fragment_t*)current->data;
+        if (fragment->type == PROCESS_FRAGMENT && fragment->pid == process->pid) {
+            return false;
+        }
+        current = current->next;
+    }
+    return true;
+}
+
+memory_allocator_t* create_swapping_allocator(int memory_size, int page_size) {
+    memory_allocator_t* allocator = malloc(sizeof(*allocator));
+    assert(allocator);
+    allocator->allocate_memory = (void *(*)(void *, process_t *)) swapping_allocate_memory;
+    allocator->use_memory = (void (*)(void *, process_t *, int)) swapping_use_memory;
+    allocator->free_memory = (void (*)(void *, process_t *)) swapping_free_memory;
+    allocator->load_memory = (void (*)(void *, process_t *)) swapping_load_memory;
+    allocator->load_time_left = (int (*)(void *, process_t *)) swapping_load_time_left;
+    allocator->require_allocation = (int (*)(void *, process_t *)) swapping_require_allocation;
+    // Unlimited allocator doesn't have a structure to manage memory;
+    allocator->structure = create_memory_list(memory_size, page_size);
+    return allocator;
 }

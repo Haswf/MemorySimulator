@@ -16,6 +16,7 @@ typedef struct memory_allocator {
     void (*load_memory)(void* memoryList, process_t* process);
     int (*load_time_left)(void* memoryList, process_t* process);
     int (*require_allocation)(void* memoryList, process_t* process);
+    int (*page_fault)(void* memoryList, process_t* process);
     void* structure;
 } memory_allocator_t;
 

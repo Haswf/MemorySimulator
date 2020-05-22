@@ -9,59 +9,7 @@
 //#include "log.c"
 #include "memory_fragment.h"
 #include "virtual_memory.h"
-/**
- * memory page size
- */
-#define PAGE_SIZE 4
-void parseFileName(char** file, int index, int argc, char *argv[]) {
-    if (strstr(argv[index], "-f") && index+1 < argc) {
-        *file = argv[index+1];
-    }
-}
 
-int parseSchedulingAlgorithm(int* scheduler, int index, int argc, char *argv[]) {
-    if (strstr(argv[index], "-a") && index+1 < argc) {
-        if (strncasecmp(argv[index+1], "ff", 2) == 0) {
-            *scheduler = FIRST_COME_FIRST_SERVED;
-        } else if (strncasecmp(argv[index+1], "rr", 2) == 0) {
-            *scheduler = ROUND_ROBIN;
-        } else if (strncasecmp(argv[index+1], "cs", 2) == 0) {
-            *scheduler = CUSTOMISED_SCHEDULING;
-        } else {
-            printf("invalid argument value %s\n", argv[index+1]);
-            exit(EXIT_FAILURE);
-        }
-    }
-};
-
-void parseMemoryAllocation(int* memoryAllocator, int index, int argc, char *argv[]) {
-    if (strstr(argv[index], "-m") && index+1 < argc) {
-        if (strncasecmp(argv[index+1], "u", 1) == 0) {
-            *memoryAllocator = UNLIMITED;
-        } else if (strncasecmp(argv[index+1], "p", 1) == 0) {
-            *memoryAllocator = SWAPPING;
-        } else if (strncasecmp(argv[index+1], "v", 1) == 0) {
-            *memoryAllocator = VIRTUAL_MEMORY;
-        } else if (strncasecmp(argv[index+1], "cm", 2) == 0) {
-            *memoryAllocator = CUSTOMISED_MEMORY;
-        } else {
-            printf("invalid argument value %s\n", argv[index+1]);
-            exit(EXIT_FAILURE);
-        }
-    }
-}
-
-void parseMemorySize(int* memory, int index, int argc, char* argv[]) {
-    if (strstr(argv[index], "-s") && index+1 < argc) {
-        *memory = atoi(argv[index+1]);
-    }
-}
-
-void parseQuantum(int* quantum, int index, int argc, char* argv[]) {
-    if (strstr(argv[index], "-q") && index+1 < argc) {
-        *quantum = atoi(argv[index+1]);
-    }
-}
 
 void inspectArguments(char* fileName, int schedulingAlgorithm, int memoryAllocation, int memorySize, int quantum) {
     printf("Filename: %s\n", fileName);
@@ -110,10 +58,10 @@ void execute(process_t* process, int clock) {
     static process_t* last = NULL;
     process->jobTime--;
     if (process!=last) {
-        log_info("<Scheduler> process %d start executing", process->pid);
+        log_info("<Scheduler> process %d start executing, ETA: %d ticks", process->pid, process->jobTime);
         last = process;
     }
-    log_trace("<Scheduler> process %d is running", process->pid);
+    log_trace("<Scheduler> process %d is running, ETA: %d ticks", process->pid, process->jobTime);
 }
 
 int load_process(Deque* pending, Deque* suspended, int clock) {
@@ -202,51 +150,43 @@ int roundRobin(memory_allocator_t* allocator, Deque* processes, int* clock, int*
     Deque *pending = new_deque((void (*)(void *)) printProcess);
     init(processes, pending, suspended);
 
-    while (deque_size(suspended) > 0 || deque_size(pending) > 0) {
-        print_deque(suspended);
-        if (deque_size(suspended) == 0) {
-            load_process(pending, suspended, *clock);
-        }
+    while (deque_size(pending) > 0 || deque_size(suspended) > 0) {
+        load_process(pending, suspended, *clock);
         // continue if there is no process ready to run
-        if (deque_size(suspended) == 0) {
-            tick(clock);
-            continue;
-        }
-        int quantumLeft = quantum;
-//        print_deque(suspended);
-        process_t* process = deque_pop(suspended);
-        printf("%d, RUNNING, id=%d, remaining-time=%d\n", *clock, process->pid, process->jobTime);
-//        printf("----------------------------\n");
-//        print_deque(suspended);
-        int page_fault_time = 0;
+        if (deque_size(suspended) > 0) {
+            int quantumLeft = quantum;
+            process_t* process = deque_pop(suspended);
 
-        while (quantumLeft > 0) {
-            // Allocate space for the process if it's not in the memory
-            int page_fault = allocator->require_allocation(allocator->structure, process);
-            void* allocation = allocator->allocate_memory(allocator->structure, process);
-            if (page_fault > 0) {
-                for (int i=0; i<page_fault_time; i++) {
-                    tick(clock);
-                    log_trace("<Memory> Page Fault");
-                    load_process(pending, suspended, *clock);
+            if (allocator->require_allocation(allocator->structure, process)) {
+                allocator->allocate_memory(allocator->structure, process);
+            }
+            int page_fault_time = allocator->page_fault(allocator->structure, process) > 0;
+            process->jobTime += page_fault_time;
+
+            printf("%d, RUNNING, id=%d, remaining-time=%d\n", *clock, process->pid, process->jobTime);
+
+            while (quantumLeft > 0 && process->jobTime > 0) {
+                // Allocate space for the process if it's not in the memory
+                if ((allocator->load_time_left(allocator->structure, process)) > 0) {
+                    allocator->load_memory(allocator->structure, process);
                 }
+                else {
+                    execute(process, *clock);
+                    allocator->use_memory(allocator->structure, process, *clock);
+                    quantumLeft--;
+                }
+                tick(clock);
+                load_process(pending, suspended, *clock);
             }
-            if ((allocator->load_time_left(allocator->structure, process)) > 0) {
-                allocator->load_memory(allocator->structure, process);
+            if (process->jobTime > 0) {
+                deque_insert(suspended, process);
+            } else {
+                allocator->free_memory(allocator->structure, process);
+                finish_process(process, finish, *clock, deque_size(suspended));
             }
-            else {
-                execute(process, *clock);
-                allocator->use_memory(allocator->structure, process, *clock);
-                quantumLeft--;
-            }
-            tick(clock);
-            load_process(pending, suspended, *clock);
         }
-        if (process->jobTime > 0) {
-            deque_insert(suspended, process);
-        } else {
-            allocator->free_memory(allocator->structure, process);
-            finish_process(process, finish, *clock, deque_size(suspended));
+        else {
+            tick(clock);
         }
     }
 }
@@ -290,19 +230,18 @@ int shortestRemainingTimeFirst(memory_allocator_t* allocator, Deque* processes, 
         }
         if (heap_size(suspended) > 0) {
 //            heap_print(suspended, printProcess);
+            process_t* process = NULL;
             process_t running = heap_pop_min(suspended);
-            process_t* process = &running;
-            printf("%d, RUNNING, id=%d, remaining-time=%d\n", *clock, process->pid, process->jobTime);
+            process = &running;
             log_debug("<Scheduler> Next process to execute is %d (%d ticks remaining)", process->pid, process->jobTime);
             if (allocator->require_allocation(allocator->structure, process)){
                 void* allocation = allocator->allocate_memory(allocator->structure, process);
-                if (!allocation){
-                    log_warn("OOM for process %d", process->pid);
-                    *finished += 1;
-                    log_info("<Scheduler> Process %d skipped",process->pid);
-                    continue;
-                }
             }
+//            int page_fault_time = allocator->page_fault(allocator->structure, process) > 0;
+//            process->jobTime += page_fault_time;
+
+            printf("%d, RUNNING, id=%d, remaining-time=%d\n", *clock, process->pid, process->jobTime);
+
             if ((allocator->load_time_left(allocator->structure, process)) > 0) {
                 allocator->load_memory(allocator->structure, process);
             } else {
@@ -323,54 +262,79 @@ int shortestRemainingTimeFirst(memory_allocator_t* allocator, Deque* processes, 
 }
 
 int main(int argc, char *argv[]) {
-    char *fileName = NULL;
-    int schedulingAlgorithm = -1;
-    int memoryAllocation = -1;
-    int memorySize = -1;
+    char file_name[100];
+    int scheduling_algorithm = -1;
+    int memory_allocation = -1;
+    int memory_size = -1;
     int quantum = 10;
     int total = 0;
-    log_set_level(LOG_LEVEL);
-    int throughput[1000];
-    for (int i=0; i<1000; i++) {
-        throughput[i] = 0;
+
+
+    char opt ;
+    while ((opt  = getopt (argc, argv, ":f:a:m:s:q:")) != -1) {
+        switch (opt) {
+            case 'f':
+                strncpy(file_name, optarg, strlen(optarg));
+                file_name[strlen(optarg)] = '\0';
+                break;
+            case 'a':
+                if (strcasecmp(optarg, "ff") == 0) {
+                    scheduling_algorithm = FIRST_COME_FIRST_SERVED;
+                } else if (strcasecmp(optarg, "rr") == 0) {
+                    scheduling_algorithm = ROUND_ROBIN;
+                } else if (strcasecmp(optarg, "cs") == 0) {
+                    scheduling_algorithm = CUSTOMISED_SCHEDULING;
+                }
+                break;
+            case 'm':
+                if (strcasecmp(optarg, "u") == 0) {
+                    memory_allocation = UNLIMITED;
+                } else if (strcasecmp(optarg, "p") == 0) {
+                    memory_allocation = SWAPPING;
+                } else if (strcasecmp(optarg, "v") == 0) {
+                    memory_allocation = VIRTUAL_MEMORY;
+                } else if (strcasecmp(optarg, "v") == 0) {
+                    memory_allocation = CUSTOMISED_MEMORY;
+                }
+                break;
+            case 's':
+                memory_size = atoi(optarg);
+                break;
+            case 'q':
+                quantum = atoi(optarg);
+                break;
+            default:
+                abort();
+        }
     }
 
-    for (int i = 1; i < argc; i++) {
-        parseFileName(&fileName, i, argc, argv);
-        parseSchedulingAlgorithm(&schedulingAlgorithm, i, argc, argv);
-        parseMemoryAllocation(&memoryAllocation, i, argc, argv);
-        parseMemorySize(&memorySize, i, argc, argv);
-        parseQuantum(&quantum, i, argc, argv);
-    }
-    inspectArguments(fileName, schedulingAlgorithm, memoryAllocation, memorySize, quantum);
+    log_set_level(LOG_LEVEL);
+
+    inspectArguments(file_name, scheduling_algorithm, memory_allocation, memory_size, quantum);
 
     memory_allocator_t* allocator = NULL;
-    if (memoryAllocation == UNLIMITED) {
+    if (memory_allocation == UNLIMITED) {
         allocator = create_unlimited_allocator();
-    } else if (memoryAllocation == SWAPPING) {
-        allocator = create_swapping_allocator(memorySize, PAGE_SIZE);
-    } else if (memoryAllocation == VIRTUAL_MEMORY) {
-        allocator = create_virtual_memory_allocator(memorySize, PAGE_SIZE);
+    } else if (memory_allocation == SWAPPING) {
+        allocator = create_swapping_allocator(memory_size, PAGE_SIZE);
+    } else if (memory_allocation == VIRTUAL_MEMORY) {
+        allocator = create_virtual_memory_allocator(memory_size, PAGE_SIZE);
     }
 
     Deque *processes = new_deque((void (*)(void *)) printProcess);
     int finished = 0;
-    total = readProcessesFromFile(fileName, processes);
+    total = readProcessesFromFile(file_name, processes);
 
     int clock = 0;
 
-    if (schedulingAlgorithm == FIRST_COME_FIRST_SERVED) {
+    if (scheduling_algorithm == FIRST_COME_FIRST_SERVED) {
         firstComeFirstServe(allocator, processes, &clock, &finished);
-    } else if (schedulingAlgorithm == ROUND_ROBIN) {
+    } else if (scheduling_algorithm == ROUND_ROBIN) {
         roundRobin(allocator, processes, &clock, &finished, quantum);
-    } else if (schedulingAlgorithm == CUSTOMISED_SCHEDULING) {
+    } else if (scheduling_algorithm == CUSTOMISED_SCHEDULING) {
         shortestRemainingTimeFirst(allocator, processes, &total, &clock, &finished);
     }
     return 0;
 };
-
-int simulate() {
-
-}
 
 

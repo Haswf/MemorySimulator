@@ -21,6 +21,9 @@ void unlimited_load_memory(void* structure, process_t* process) {
 int unlimited_require_allocation(void* structure, process_t* process) {
     return 0;
 }
+int unlimited_page_fault(void* structure, process_t* process) {
+    return 0;
+}
 memory_allocator_t* create_unlimited_allocator() {
     memory_allocator_t* allocator = malloc(sizeof(*allocator));
     assert(allocator);
@@ -30,6 +33,7 @@ memory_allocator_t* create_unlimited_allocator() {
     allocator->load_memory = unlimited_load_memory;
     allocator->load_time_left = unlimited_load_time_left;
     allocator->require_allocation = unlimited_require_allocation;
+    allocator->page_fault = unlimited_page_fault;
     // Unlimited allocator doesn't have a structure to manage memory;
     allocator->structure = NULL;
     return allocator;

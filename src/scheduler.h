@@ -16,6 +16,8 @@
 #include "memory_fragment.h"
 #include "log.h"
 #include "memory_allocator.h"
+#include <ctype.h>
+#include <unistd.h>
 
 #include "log.h"
 

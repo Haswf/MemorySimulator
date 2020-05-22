@@ -359,6 +359,11 @@ int swapping_require_allocation(memory_list_t* memoryList, process_t* process) {
     return -1;
 }
 
+int swapping_page_fault(memory_list_t* memoryList, process_t* process) {
+    assert(memoryList && process);
+    return 0;
+}
+
 memory_allocator_t* create_swapping_allocator(int memory_size, int page_size) {
     memory_allocator_t* allocator = malloc(sizeof(*allocator));
     assert(allocator);
@@ -368,6 +373,7 @@ memory_allocator_t* create_swapping_allocator(int memory_size, int page_size) {
     allocator->load_memory = (void (*)(void *, process_t *)) swapping_load_memory;
     allocator->load_time_left = (int (*)(void *, process_t *)) swapping_load_time_left;
     allocator->require_allocation = (int (*)(void *, process_t *)) swapping_require_allocation;
+    allocator->page_fault = (int (*)(void *, process_t *)) swapping_page_fault;
     // Unlimited allocator doesn't have a structure to manage memory;
     allocator->structure = create_memory_list(memory_size, page_size);
     return allocator;

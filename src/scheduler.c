@@ -352,7 +352,7 @@ void finish_process(process_t* process, Deque* finish, int clock, int proc_remai
 //    free_process(process);
 }
 void analysis(Deque* finished, int clock) {
-    int interval = (clock)/60;
+    int interval = (int)ceil((double)(clock)/60);
     int throughput[interval];
     for (int i=0; i<interval; i++) {
         throughput[i] = 0;
@@ -362,14 +362,16 @@ void analysis(Deque* finished, int clock) {
     int total_turn_around = 0;
     int total_job_time = 0;
     double max_overhead = 0;
+    double total_overhead = 0;
     while (deque_size(finished) > 0) {
         process_t* process = deque_pop(finished);
         int turn_around = process->finish_time - process->timeArrived;
-        double overhead = (double)turn_around/(double)process->job_time;
+        double overhead = (double)turn_around/process->job_time;
+        total_overhead += overhead;
         if (overhead > max_overhead) {
             max_overhead = overhead;
         }
-        throughput[process->finish_time/61] += 1;
+        throughput[(int)ceil((double)process->finish_time/60)] += 1;
         total_turn_around += turn_around;
         total_job_time += process->job_time;
         free_process(process);
@@ -390,8 +392,8 @@ void analysis(Deque* finished, int clock) {
 
     }
 
-    printf("Throughput %d %d %d\n", (int)ceil((double)throughput_total/(double)interval), throughput_min, throughput_max);
+    printf("Throughput %d, %d, %d\n", (int)ceil((double)throughput_total/(double)interval), throughput_min, throughput_max);
     printf("Turnaround time %d\n", (int)ceil((double)total_turn_around/(double)total_job));
-    printf("Time overhead %.2f %.2f\n", max_overhead, (double)total_turn_around/(double)total_job_time);
+    printf("Time overhead %.2f %.2f\n", max_overhead, (double)total_overhead/(double)total_job);
     printf("Makespan %d\n", clock);
 }

@@ -310,7 +310,7 @@ void virtual_print_addresses(virtual_memory_t* memory_manager, process_t* proces
             index++;
         }
     }
-    printf("mem_addresses=");
+    printf("mem-addresses=");
     print_memory(addr_to_print, page_table->valid_page_count);
     printf("\n");
     free(addr_to_print);

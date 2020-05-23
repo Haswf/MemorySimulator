@@ -207,6 +207,7 @@ Node* join_next(memory_list_t* memoryList, Node* nodeToEvict) {
      *      current    +       next         = merged
      * [0, 0, 100, 25] + [100, 25, 100, 25] = [0, 0, 200, 50]
      * Byte start and page start of the previous fragment should remain unchanged */
+
     /* Update total byte length*/
     int total_size = fragmentToEvict->byte_length + nextFragment->byte_length;
     fragmentToEvict->byte_length = total_size;
@@ -282,7 +283,7 @@ Node* evict(memory_list_t* memoryList, Node* nodeToEvict) {
  * @param process
  * @param clock
  */
-Node* swapping_allocate_memory(memory_list_t* memoryList, process_t* process) {
+Node* swapping_allocate_memory(memory_list_t* memoryList, process_t* process, int clock) {
     /*
      * Use first fit algorithm to find a fragment large enough for the process
      */
@@ -297,9 +298,18 @@ Node* swapping_allocate_memory(memory_list_t* memoryList, process_t* process) {
         Node* toEvict = find_least_recently_used(memoryList);
         if (toEvict) {
             memory_fragment_t* fragment = (memory_fragment_t*)toEvict->data;
-            log_debug("<MEMORY> Evicting pages for process %d (last access: %d) with %d pages (%d bytes)", fragment->pid, fragment->last_access, fragment->page_length, fragment->byte_length);
-            evict(memoryList, toEvict);
+            int page_to_free = fragment->page_length;
+            int* addr_to_print = malloc(sizeof(*addr_to_print) * page_to_free);
+            int index = 0;
+            for (int i=0; i<fragment->page_length; i++) {
+                addr_to_print[index++] = fragment->page_start + i;
+            }
+            printf("%d, EVICTED, mem-addresses=", clock);
+            print_memory(addr_to_print, fragment->page_length);
+            printf("\n");
+            free(addr_to_print);
             freeSpace = first_fit(memoryList, process);
+            evict(memoryList, toEvict);
         } else {
             return NULL;
         }
@@ -379,19 +389,20 @@ void swapping_free_memory(memory_list_t* memoryList, process_t* process, int clo
     while (current) {
         memory_fragment_t* fragment = (memory_fragment_t*)current->data;
         if (fragment->type == PROCESS_FRAGMENT && fragment->pid == process->pid) {
-            evict(memoryList, current);
-            printf("%d, EVICTED, mem_addresses=", clock);
             int page_to_free = fragment->page_length;
             int* addr_to_print = malloc(sizeof(*addr_to_print) * page_to_free);
             int index = 0;
             for (int i=0; i<fragment->page_length; i++) {
                 addr_to_print[index++] = fragment->page_start + i;
             }
+            printf("%d, EVICTED, mem-addresses=", clock);
             print_memory(addr_to_print, fragment->page_length);
             printf("\n");
             free(addr_to_print);
-        }
-        current = current->next;
+            current = evict(memoryList, current);
+        } else {
+            current = current->next;
+        };
     }
 }
 

@@ -31,7 +31,7 @@ void print_memory_list(memory_list_t* memoryList);
 Node* evict(memory_list_t* memoryList, Node* nodeToEvict);
 Node* find_least_recently_used(memory_list_t* memoryList);
 void swapping_use_memory(memory_list_t* memoryList, process_t* process, int clock);
-Node* swapping_allocate_memory(memory_list_t* memoryList, process_t* process);
+Node* swapping_allocate_memory(memory_list_t* memoryList, process_t* process, int clock);
 void swapping_free_memory(memory_list_t* memoryList, process_t* process, int clock);
 int byteToRequiredPage(int bytes, int page_size);
 int byteToAvailablePage(int bytes, int page_size);

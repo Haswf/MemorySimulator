@@ -13,6 +13,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "memory_allocator.h"
+#include "../test/swapping_test.h"
+#include <math.h>
 
 typedef struct memory_list {
     Dlist* list;
@@ -30,10 +32,12 @@ Node* evict(memory_list_t* memoryList, Node* nodeToEvict);
 Node* find_least_recently_used(memory_list_t* memoryList);
 void swapping_use_memory(memory_list_t* memoryList, process_t* process, int clock);
 Node* swapping_allocate_memory(memory_list_t* memoryList, process_t* process);
-void swapping_free_memory(memory_list_t* memoryList, process_t* process);
+void swapping_free_memory(memory_list_t* memoryList, process_t* process, int clock);
 int byteToRequiredPage(int bytes, int page_size);
 int byteToAvailablePage(int bytes, int page_size);
 void swapping_load_memory(memory_list_t* memoryList, process_t* process);
 memory_allocator_t* create_swapping_allocator(int memory_size, int page_size);
+int swapping_memory_usage(memory_list_t* memoryList, process_t* process);
+void swapping_print_addresses(memory_list_t* memoryList, process_t* process);
 
 #endif //SCHEDULER_SWAPPING_H

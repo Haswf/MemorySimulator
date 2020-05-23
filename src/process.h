@@ -5,16 +5,18 @@
 #ifndef COMP30023_2020_PROJECT_2_PROCESS_H
 #define COMP30023_2020_PROJECT_2_PROCESS_H
 #include "log.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 typedef struct process {
     int timeArrived;
     int pid;
     int memory;
-    int jobTime;
+    int remaining_time;
+    int job_time;
+    int finish_time;
 } process_t;
 
-
-void output_execute(int clock, process_t* process, int loading_time);
 
 void output_finish(int clock, process_t* process, int proc_remaining);
 
@@ -25,8 +27,6 @@ void printProcess(process_t* process);
 void free_process(process_t* process);
 
 void dlist_free_process(void* process);
-
-void finish_process(process_t* process, int* finish, int clock, int proc_remaining);
 
 void log_process(process_t* process);
 

@@ -16,7 +16,7 @@
 #define DEQUE_H
 
 #include "dlist.h"
-
+#include "process.h"
 // You may change the definition of Deque but DO NOT change the name
 typedef struct deque Deque;
 typedef process_t tNode;

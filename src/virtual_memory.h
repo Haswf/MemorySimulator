@@ -47,4 +47,7 @@ virtual_memory_t* create_virtual_memory(int memory_size, int page_size);
 page_table_node_t* find_the_oldest_process(virtual_memory_t* memory_manager, process_t* process);
 memory_allocator_t* create_virtual_memory_allocator(int memory_size, int page_size);
 void print_memory(int* addresses, int count);
+int map(page_table_node_t * page_table, int frame_number);
+int virtual_memory_usage(virtual_memory_t* memory_manager);
+void virtual_print_addresses(virtual_memory_t* memory_manager, process_t* process);
 #endif //SCHEDULER_VIRTUAL_MEMORY_H

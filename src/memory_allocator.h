@@ -10,13 +10,14 @@
 #include <stdlib.h>
 #include <stdbool.h>
 typedef struct memory_allocator {
-    void* (*allocate_memory)(void*, process_t*);
-    void (*use_memory)(void*, process_t*, int);
-    void (*free_memory)(void*, process_t*);
-    void (*load_memory)(void* memoryList, process_t* process);
-    int (*load_time_left)(void* memoryList, process_t* process);
-    int (*require_allocation)(void* memoryList, process_t* process);
-    int (*page_fault)(void* memoryList, process_t* process);
+    void* (*malloc)(void*, process_t*, int);
+    void (*info)(void*, process_t*, int);
+    void (*use)(void*, process_t*, int);
+    void (*free)(void*, process_t*, int);
+    void (*load)(void*, process_t*);
+    int (*load_time_left)(void*, process_t*);
+    int (*require_allocation)(void*, process_t*);
+    int (*page_fault)(void*, process_t*);
     void* structure;
 } memory_allocator_t;
 #endif //SCHEDULER_MEMORY_ALLOCATOR_H

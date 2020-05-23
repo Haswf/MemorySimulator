@@ -3,12 +3,7 @@
 //
 
 #include "scheduler.h"
-#include "unlimited.h"
-#include "output.h"
-#include "log.h"
-//#include "log.c"
-#include "memory_fragment.h"
-#include "virtual_memory.h"
+
 
 
 void inspectArguments(char* fileName, int schedulingAlgorithm, int memoryAllocation, int memorySize, int quantum) {
@@ -44,24 +39,15 @@ int readProcessesFromFile(char* fileName, Deque* deque) {
     fclose(fp);
     return count;
 }
-void run(process_t* process) {
-    static process_t* last = NULL;
-    process->jobTime--;
-    if (process!=last) {
-        log_info("<Scheduler> process %d start executing", process->pid);
-        last = process;
-    }
-    log_trace("<Scheduler> process %d is running", process->pid);
-}
 
 void execute(process_t* process, int clock) {
     static process_t* last = NULL;
-    process->jobTime--;
+    process->remaining_time--;
     if (process!=last) {
-        log_info("<Scheduler> process %d start executing, ETA: %d ticks", process->pid, process->jobTime);
+        log_info("<Scheduler> process %d start executing, ETA: %d ticks", process->pid, process->remaining_time);
         last = process;
     }
-    log_trace("<Scheduler> process %d is running, ETA: %d ticks", process->pid, process->jobTime);
+    log_trace("<Scheduler> process %d is running, ETA: %d ticks", process->pid, process->remaining_time);
 }
 
 int load_process(Deque* pending, Deque* suspended, int clock) {
@@ -77,7 +63,7 @@ int load_process(Deque* pending, Deque* suspended, int clock) {
     while (heap_size(toAdd) > 0) {
         process_t next_process = heap_pop_min(toAdd);
         log_info("<Scheduler> Process %d inserted to suspended queue", next_process.pid);
-        process_t* next = create_process(next_process.timeArrived, next_process.pid, next_process.memory, next_process.jobTime);
+        process_t* next = create_process(next_process.timeArrived, next_process.pid, next_process.memory, next_process.job_time);
         deque_insert(suspended, next);
         count++;
     }
@@ -100,7 +86,7 @@ int init(Deque* processes, Deque* pending, Deque* suspended) {
 };
 
 
-int firstComeFirstServe(memory_allocator_t* allocator, Deque* processes, int* clock, int* finish) {
+int firstComeFirstServe(memory_allocator_t* allocator, Deque* processes, Deque* finish, int* clock) {
     Deque *suspended = new_deque((void (*)(void *)) printProcess);
     Deque *pending = new_deque((void (*)(void *)) printProcess);
 
@@ -114,24 +100,23 @@ int firstComeFirstServe(memory_allocator_t* allocator, Deque* processes, int* cl
             continue;
         }
         process_t* process = deque_pop(suspended);
-        printf("%d, RUNNING, id=%d, remaining-time=%d\n", *clock, process->pid, process->jobTime);
 
         if (allocator->require_allocation(allocator->structure, process)) {
-            void* allocation = allocator->allocate_memory(allocator->structure, process);
+            void* allocation = allocator->malloc(allocator->structure, process, *clock);
             if (!allocation){
                 log_warn("OOM for process %d", process->pid);
                 finish_process(process, finish, *clock, deque_size(suspended));
                 break;
             }
         }
-        output_execute(*clock, process, (allocator->load_time_left(allocator->structure, process)));
+        allocator->info(allocator->structure, process, *clock);
 
-        while (process->jobTime > 0) {
+        while (process->remaining_time > 0) {
             if ((allocator->load_time_left(allocator->structure, process)) > 0) {
-                allocator->load_memory(allocator->structure, process);
+                allocator->load(allocator->structure, process);
             } else {
                 execute(process, *clock);
-                allocator->use_memory(allocator->structure, process, *clock);
+                allocator->use(allocator->structure, process, *clock);
 
             }
             load_process(pending, suspended, *clock);
@@ -140,12 +125,12 @@ int firstComeFirstServe(memory_allocator_t* allocator, Deque* processes, int* cl
         /* A process that has 0 seconds left to run, should be "evicted" from memory before marking the process as
          * finished
          */
-        allocator->free_memory(allocator->structure, process);
+        allocator->free(allocator->structure, process, *clock);
         finish_process(process, finish, *clock, deque_size(suspended));
     }
 }
 
-int roundRobin(memory_allocator_t* allocator, Deque* processes, int* clock, int* finish, int quantum) {
+int roundRobin(memory_allocator_t* allocator, Deque* processes, Deque* finish, int* clock, int quantum) {
     Deque *suspended = new_deque((void (*)(void *)) printProcess);
     Deque *pending = new_deque((void (*)(void *)) printProcess);
     init(processes, pending, suspended);
@@ -158,30 +143,30 @@ int roundRobin(memory_allocator_t* allocator, Deque* processes, int* clock, int*
             process_t* process = deque_pop(suspended);
 
             if (allocator->require_allocation(allocator->structure, process)) {
-                allocator->allocate_memory(allocator->structure, process);
+                allocator->malloc(allocator->structure, process, *clock);
             }
             int page_fault_time = allocator->page_fault(allocator->structure, process) > 0;
-            process->jobTime += page_fault_time;
+            process->remaining_time += page_fault_time;
+            allocator->info(allocator->structure, process, *clock);
 
-            printf("%d, RUNNING, id=%d, remaining-time=%d\n", *clock, process->pid, process->jobTime);
 
-            while (quantumLeft > 0 && process->jobTime > 0) {
+            while (quantumLeft > 0 && process->remaining_time > 0) {
                 // Allocate space for the process if it's not in the memory
                 if ((allocator->load_time_left(allocator->structure, process)) > 0) {
-                    allocator->load_memory(allocator->structure, process);
+                    allocator->load(allocator->structure, process);
                 }
                 else {
                     execute(process, *clock);
-                    allocator->use_memory(allocator->structure, process, *clock);
+                    allocator->use(allocator->structure, process, *clock);
                     quantumLeft--;
                 }
                 tick(clock);
                 load_process(pending, suspended, *clock);
             }
-            if (process->jobTime > 0) {
+            if (process->remaining_time > 0) {
                 deque_insert(suspended, process);
             } else {
-                allocator->free_memory(allocator->structure, process);
+                allocator->free(allocator->structure, process, *clock);
                 finish_process(process, finish, *clock, deque_size(suspended));
             }
         }
@@ -191,13 +176,8 @@ int roundRobin(memory_allocator_t* allocator, Deque* processes, int* clock, int*
     }
 }
 
-
-int compare_job_time(void * a, void * b) {
-    return ((process_t*)a)->jobTime - ((process_t*)b)->jobTime;
-}
-
 int compare_remaining_time(void * a, void * b) {
-    return ((process_t*)a)->jobTime - ((process_t*)b)->jobTime;
+    return ((process_t*)a)->remaining_time - ((process_t*)b)->remaining_time;
 }
 
 
@@ -206,8 +186,8 @@ int compare_PID(void * a, void * b) {
 }
 
 
-int shortestRemainingTimeFirst(memory_allocator_t* allocator, Deque* processes, int* total, int* clock, int* finished) {
-    heap_t *suspended = create_heap(*total, compare_job_time);
+int shortestRemainingTimeFirst(memory_allocator_t* allocator, Deque* processes, Deque* finish, int* clock) {
+    heap_t *suspended = create_heap(deque_size(processes), compare_remaining_time);
     Deque *pending = new_deque((void (*)(void *)) printProcess);
     while (deque_size(processes) > 0) {
         process_t *process = deque_pop(processes);
@@ -238,28 +218,29 @@ int shortestRemainingTimeFirst(memory_allocator_t* allocator, Deque* processes, 
             process_t* process = NULL;
             process_t running = heap_pop_min(suspended);
             process = &running;
-            log_debug("<Scheduler> Next process to execute is %d (%d ticks remaining)", process->pid, process->jobTime);
             if (allocator->require_allocation(allocator->structure, process)){
-                void* allocation = allocator->allocate_memory(allocator->structure, process);
+                void* allocation = allocator->malloc(allocator->structure, process, *clock);
             }
 //            int page_fault_time = allocator->page_fault(allocator->structure, process) > 0;
 //            process->jobTime += page_fault_time;
 
-            printf("%d, RUNNING, id=%d, remaining-time=%d\n", *clock, process->pid, process->jobTime);
+//            printf("%d, RUNNING, id=%d, remaining-time=%d\n", *clock, process->pid, process->jobTime);
 
             if ((allocator->load_time_left(allocator->structure, process)) > 0) {
-                allocator->load_memory(allocator->structure, process);
+                allocator->load(allocator->structure, process);
             } else {
                 execute(process, *clock);
-                allocator->use_memory(allocator->structure, process, *clock);
+                allocator->use(allocator->structure, process, *clock);
             }
 
-            if (running.jobTime > 0) {
+            if (running.remaining_time > 0) {
                 heap_insert(suspended, running);
             } else {
-                allocator->free_memory(allocator->structure, process);
+                allocator->free(allocator->structure, process, *clock);
                 log_info("<Scheduler> Process %d finished",process->pid);
-                *finished += 1;
+                process_t * copy = create_process(process->timeArrived, process->pid, process->memory, process->job_time);
+                copy->finish_time = *clock;
+                deque_insert(finish, copy);
             }
         }
         tick(clock);
@@ -315,7 +296,7 @@ int main(int argc, char *argv[]) {
 
     log_set_level(LOG_LEVEL);
 
-    inspectArguments(file_name, scheduling_algorithm, memory_allocation, memory_size, quantum);
+//    inspectArguments(file_name, scheduling_algorithm, memory_allocation, memory_size, quantum);
 
     /*
      * Create a memory allocator based on input argument
@@ -330,17 +311,18 @@ int main(int argc, char *argv[]) {
     }
 
     Deque *processes = new_deque((void (*)(void *)) printProcess);
-    int finished = 0;
+    Deque *finish = new_deque((void (*)(void *)) printProcess);
     total = readProcessesFromFile(file_name, processes);
     int clock = 0;
 
     if (scheduling_algorithm == FIRST_COME_FIRST_SERVED) {
-        firstComeFirstServe(allocator, processes, &clock, &finished);
+        firstComeFirstServe(allocator, processes, finish, &clock) ;
     } else if (scheduling_algorithm == ROUND_ROBIN) {
-        roundRobin(allocator, processes, &clock, &finished, quantum);
+        roundRobin(allocator, processes, finish, &clock, quantum);
     } else if (scheduling_algorithm == CUSTOMISED_SCHEDULING) {
-        shortestRemainingTimeFirst(allocator, processes, &total, &clock, &finished);
+        shortestRemainingTimeFirst(allocator, processes, finish, &clock);
     }
+    analysis(finish, clock);
     return 0;
 };
 
@@ -362,3 +344,54 @@ void print_memory(int* addresses, int count) {
     printf("]");
 }
 
+void finish_process(process_t* process, Deque* finish, int clock, int proc_remaining) {
+    log_info("<Scheduler> Process %d finished",process->pid);
+    process->finish_time = clock;
+    output_finish(clock, process, proc_remaining);
+    deque_insert(finish, process);
+//    free_process(process);
+}
+void analysis(Deque* finished, int clock) {
+    int interval = (clock)/60;
+    int throughput[interval];
+    for (int i=0; i<interval; i++) {
+        throughput[i] = 0;
+    }
+
+    int total_job = deque_size(finished);
+    int total_turn_around = 0;
+    int total_job_time = 0;
+    double max_overhead = 0;
+    while (deque_size(finished) > 0) {
+        process_t* process = deque_pop(finished);
+        int turn_around = process->finish_time - process->timeArrived;
+        double overhead = (double)turn_around/(double)process->job_time;
+        if (overhead > max_overhead) {
+            max_overhead = overhead;
+        }
+        throughput[process->finish_time/61] += 1;
+        total_turn_around += turn_around;
+        total_job_time += process->job_time;
+        free_process(process);
+    }
+
+    int throughput_total = 0;
+    int throughput_min = INT_MAX;
+    int throughput_max = INT_MIN;
+
+    for (int j=0; j<interval; j++) {
+        throughput_total += throughput[j];
+        if (throughput[j] < throughput_min) {
+            throughput_min = throughput[j];
+        }
+        if (throughput[j] > throughput_max) {
+            throughput_max = throughput[j];
+        }
+
+    }
+
+    printf("Throughput %d %d %d\n", (int)ceil((double)throughput_total/(double)interval), throughput_min, throughput_max);
+    printf("Turnaround time %d\n", (int)ceil((double)total_turn_around/(double)total_job));
+    printf("Time overhead %.2f %.2f\n", max_overhead, (double)total_turn_around/(double)total_job_time);
+    printf("Makespan %d\n", clock);
+}

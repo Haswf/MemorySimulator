@@ -2,8 +2,8 @@
 // Created by Haswell on 18/05/2020.
 //
 #include "swapping.h"
-#include "memory_fragment.h"
-#include "../test/swapping_test.h"
+#include "virtual_memory.h"
+
 
 /**
  * Create a memory list
@@ -308,6 +308,18 @@ Node* swapping_allocate_memory(memory_list_t* memoryList, process_t* process) {
     return allocate(memoryList, freeSpace, process);
 }
 
+memory_fragment_t* get_fragment(memory_list_t* memoryList, process_t* process) {
+    Node* current = memoryList->list->head;
+
+    while (current) {
+        memory_fragment_t* fragment = (memory_fragment_t*)current->data;
+        if (fragment->type == PROCESS_FRAGMENT && fragment->pid == process->pid) {
+            return fragment;
+        }
+        current = current->next;
+    }
+}
+
 /**
  * Use memory
  * This internally updated last access time of the fragment.
@@ -317,30 +329,67 @@ Node* swapping_allocate_memory(memory_list_t* memoryList, process_t* process) {
  */
 void swapping_use_memory(memory_list_t* memoryList, process_t* process, int clock) {
     assert(memoryList && process);
+    memory_fragment_t* fragment = get_fragment(memoryList, process);
+    fragment->last_access = clock;
+}
+
+void swapping_process_info(memory_list_t* memoryList, process_t* process, int clock) {
+    memory_fragment_t* fragment = get_fragment(memoryList, process);
+    printf("%d, RUNNING, id=%d, remaining-time=%d, load-time=%d, mem-usage=%d%%, mem-addresses=",
+           clock,
+           process->pid,
+           process->remaining_time,
+           fragment->load_time,
+           swapping_memory_usage(memoryList, process));
+    swapping_print_addresses(memoryList, process);
+    printf("\n");
+}
+
+void swapping_print_addresses(memory_list_t* memoryList, process_t* process) {
+    assert(memoryList && process);
+    memory_fragment_t* fragment = get_fragment(memoryList, process);
+    int* addr_to_print = malloc(sizeof(*addr_to_print) * fragment->page_length);
+    int index = 0;
+    for (int i=0; i<fragment->page_length; i++) {
+        addr_to_print[index++] = fragment->page_start + i;
+    }
+    print_memory(addr_to_print, fragment->page_length);
+    free(addr_to_print);
+}
+
+int swapping_memory_usage(memory_list_t* memoryList, process_t* process) {
+    assert(memoryList && process);
+    int total = 0;
+    int in_use = 0;
     Node* current = memoryList->list->head;
     while (current) {
         memory_fragment_t* fragment = (memory_fragment_t*)current->data;
-        if (fragment->type == PROCESS_FRAGMENT && fragment->pid == process->pid) {
-            fragment->last_access = clock;
+        if (fragment->type == PROCESS_FRAGMENT) {
+            in_use+=fragment->page_length;
         }
+        total+=fragment->page_length;
         current = current->next;
     }
+    return ceil((double)in_use * 100 /(double)total);
 }
 
-void swapping_free_memory(memory_list_t* memoryList, process_t* process) {
+void swapping_free_memory(memory_list_t* memoryList, process_t* process, int clock) {
     assert(memoryList && process);
     Node* current = memoryList->list->head;
     while (current) {
         memory_fragment_t* fragment = (memory_fragment_t*)current->data;
         if (fragment->type == PROCESS_FRAGMENT && fragment->pid == process->pid) {
-            log_debug("<MEMORY> Free memory allocated for process %d (%d pages %d bytes)", process->pid, fragment->page_length, fragment->byte_length);
-            log_trace("-------------before------------");
-            log_memory_list(memoryList);
             evict(memoryList, current);
-            log_trace("-------------after------------");
-            log_memory_list(memoryList);
-            log_trace("------------------------------");
-            return;
+            printf("%d, EVICTED, mem_addresses=", clock);
+            int page_to_free = fragment->page_length;
+            int* addr_to_print = malloc(sizeof(*addr_to_print) * page_to_free);
+            int index = 0;
+            for (int i=0; i<fragment->page_length; i++) {
+                addr_to_print[index++] = fragment->page_start + i;
+            }
+            print_memory(addr_to_print, fragment->page_length);
+            printf("\n");
+            free(addr_to_print);
         }
         current = current->next;
     }
@@ -367,10 +416,11 @@ int swapping_page_fault(memory_list_t* memoryList, process_t* process) {
 memory_allocator_t* create_swapping_allocator(int memory_size, int page_size) {
     memory_allocator_t* allocator = malloc(sizeof(*allocator));
     assert(allocator);
-    allocator->allocate_memory = (void *(*)(void *, process_t *)) swapping_allocate_memory;
-    allocator->use_memory = (void (*)(void *, process_t *, int)) swapping_use_memory;
-    allocator->free_memory = (void (*)(void *, process_t *)) swapping_free_memory;
-    allocator->load_memory = (void (*)(void *, process_t *)) swapping_load_memory;
+    allocator->malloc = (void *(*)(void *, process_t *)) swapping_allocate_memory;
+    allocator->info = (void (*)(void *, process_t *, int)) swapping_process_info;
+    allocator->use = (void (*)(void *, process_t *, int)) swapping_use_memory;
+    allocator->free = (void (*)(void *, process_t *)) swapping_free_memory;
+    allocator->load = (void (*)(void *, process_t *)) swapping_load_memory;
     allocator->load_time_left = (int (*)(void *, process_t *)) swapping_load_time_left;
     allocator->require_allocation = (int (*)(void *, process_t *)) swapping_require_allocation;
     allocator->page_fault = (int (*)(void *, process_t *)) swapping_page_fault;

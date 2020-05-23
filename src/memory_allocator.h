@@ -19,6 +19,4 @@ typedef struct memory_allocator {
     int (*page_fault)(void* memoryList, process_t* process);
     void* structure;
 } memory_allocator_t;
-
-void free_memory_allocator(memory_allocator_t* allocator);
 #endif //SCHEDULER_MEMORY_ALLOCATOR_H

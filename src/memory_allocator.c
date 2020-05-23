@@ -3,8 +3,3 @@
 //
 
 #include "memory_allocator.h"
-
-void free_memory_allocator(memory_allocator_t* allocator) {
-    assert(allocator);
-    free(allocator);
-}

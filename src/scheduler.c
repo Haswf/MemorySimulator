@@ -88,7 +88,7 @@ int load_process(Deque* pending, Deque* suspended, int clock) {
 
 void tick(int* clock) {
     *clock = *clock+1;
-    log_info("-------- t=%d --------", *clock);
+//    log_info("-------- t=%d --------", *clock);
 }
 
 int init(Deque* processes, Deque* pending, Deque* suspended) {
@@ -195,6 +195,11 @@ int roundRobin(memory_allocator_t* allocator, Deque* processes, int* clock, int*
 int compare_job_time(void * a, void * b) {
     return ((process_t*)a)->jobTime - ((process_t*)b)->jobTime;
 }
+
+int compare_remaining_time(void * a, void * b) {
+    return ((process_t*)a)->jobTime - ((process_t*)b)->jobTime;
+}
+
 
 int compare_PID(void * a, void * b) {
     return (((process_t *)a)->pid - ((process_t*)b)->pid);
@@ -312,6 +317,9 @@ int main(int argc, char *argv[]) {
 
     inspectArguments(file_name, scheduling_algorithm, memory_allocation, memory_size, quantum);
 
+    /*
+     * Create a memory allocator based on input argument
+     */
     memory_allocator_t* allocator = NULL;
     if (memory_allocation == UNLIMITED) {
         allocator = create_unlimited_allocator();
@@ -324,7 +332,6 @@ int main(int argc, char *argv[]) {
     Deque *processes = new_deque((void (*)(void *)) printProcess);
     int finished = 0;
     total = readProcessesFromFile(file_name, processes);
-
     int clock = 0;
 
     if (scheduling_algorithm == FIRST_COME_FIRST_SERVED) {
@@ -337,4 +344,21 @@ int main(int argc, char *argv[]) {
     return 0;
 };
 
+int cmp_int (const void * a, const void * b) {
+    return ( *(int*)a - *(int*)b );
+}
+
+void print_memory(int* addresses, int count) {
+    printf("[");
+    qsort(addresses, count, sizeof(*addresses), cmp_int);
+    for (int i=0; i<count; i++) {
+        if (i == 0) {
+            printf("%d",addresses[i]);
+        }
+        else {
+            printf(",%d",addresses[i]);
+        }
+    }
+    printf("]");
+}
 

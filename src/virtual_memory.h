@@ -41,10 +41,10 @@ typedef struct page_table_node {
     int loading_time_left;
 } page_table_node_t;
 
+int deallocate_one_page(virtual_memory_t* memory_manager, page_table_node_t* page_table);
 page_table_node_t* create_page_table_node(int pid, int page_count);
 virtual_memory_t* create_virtual_memory(int memory_size, int page_size);
-page_table_node_t* find_least_recently_executed_process(virtual_memory_t* memory_manager, process_t* process);
-int deallocate_one_page(virtual_memory_t* memory_manager, page_table_node_t* page_table);
+page_table_node_t* find_the_oldest_process(virtual_memory_t* memory_manager, process_t* process);
 memory_allocator_t* create_virtual_memory_allocator(int memory_size, int page_size);
-
+void print_memory(int* addresses, int count);
 #endif //SCHEDULER_VIRTUAL_MEMORY_H

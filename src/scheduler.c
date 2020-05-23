@@ -149,7 +149,6 @@ int roundRobin(memory_allocator_t* allocator, Deque* processes, Deque* finish, i
             process->remaining_time += page_fault_time;
             allocator->info(allocator->structure, process, *clock);
 
-
             while (quantumLeft > 0 && process->remaining_time > 0) {
                 // Allocate space for the process if it's not in the memory
                 if ((allocator->load_time_left(allocator->structure, process)) > 0) {
@@ -352,7 +351,7 @@ void finish_process(process_t* process, Deque* finish, int clock, int proc_remai
 //    free_process(process);
 }
 void analysis(Deque* finished, int clock) {
-    int interval = (int)ceil((double)(clock)/60);
+    int interval = (int)ceil((double)(clock)/61);
     int throughput[interval];
     for (int i=0; i<interval; i++) {
         throughput[i] = 0;
@@ -371,7 +370,12 @@ void analysis(Deque* finished, int clock) {
         if (overhead > max_overhead) {
             max_overhead = overhead;
         }
-        throughput[(int)ceil((double)process->finish_time/60)] += 1;
+        for (int t=0; t<interval;t++) {
+            if (process->finish_time > 60*t && process->finish_time<= 60*(t+1)) {
+                throughput[t] += 1;
+                break;
+            }
+        }
         total_turn_around += turn_around;
         total_job_time += process->job_time;
         free_process(process);

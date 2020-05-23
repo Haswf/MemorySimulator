@@ -308,8 +308,8 @@ Node* swapping_allocate_memory(memory_list_t* memoryList, process_t* process, in
             print_memory(addr_to_print, fragment->page_length);
             printf("\n");
             free(addr_to_print);
-            freeSpace = first_fit(memoryList, process);
             evict(memoryList, toEvict);
+            freeSpace = first_fit(memoryList, process);
         } else {
             return NULL;
         }
@@ -345,6 +345,7 @@ void swapping_use_memory(memory_list_t* memoryList, process_t* process, int cloc
 
 void swapping_process_info(memory_list_t* memoryList, process_t* process, int clock) {
     memory_fragment_t* fragment = get_fragment(memoryList, process);
+    assert(fragment);
     printf("%d, RUNNING, id=%d, remaining-time=%d, load-time=%d, mem-usage=%d%%, mem-addresses=",
            clock,
            process->pid,

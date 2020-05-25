@@ -29,6 +29,7 @@ int firstComeFirstServe(memory_allocator_t* allocator, Deque* processes, Deque* 
 void execute(process_t* process, int clock);
 void finish_process(process_t* process, Deque* finish, int clock, int proc_remaining);
 void analysis(Deque* finished, int clock);
+void load_new_process(heap_t* suspended, Deque* pending, int clock);
 
 #define MAX_PROCESS_ARRIVAL_PER_TICK 100
 #endif //COMP30023_2020_PROJECT_2_SCHEDULER_H

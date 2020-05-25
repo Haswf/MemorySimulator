@@ -4,6 +4,7 @@
 
 #include "virtual_memory.h"
 #include "output.h"
+#define UINT_BIT 8
 
 page_table_node_t* create_page_table_node(int pid, int page_count) {
     page_table_node_t* page = (page_table_node_t*)malloc(sizeof(*page));
@@ -17,7 +18,7 @@ page_table_node_t* create_page_table_node(int pid, int page_count) {
     page->last_access = -1;
     for (int i=0; i<page_count; i++) {
         page->page_table_pointer[i].frame_number = -1;
-        page->page_table_pointer[i].referenced = 0;
+        page->page_table_pointer[i].reference = 0;
         page->page_table_pointer[i].validity = 0;
     }
     return page;
@@ -67,15 +68,9 @@ int map(page_table_node_t * page_table, int frame_number) {
 void print_page_table(page_table_node_t* page_table, bool verbose) {
     printf("pid: %d %d/%d last access: %d\n", page_table->pid, page_table->valid_page_count, page_table->page_count, page_table->last_access);
     for (int i=0; i<page_table->page_count; i++) {
-        printf("%d: [%d] %d\t", i, page_table->page_table_pointer[i].validity, page_table->page_table_pointer[i].frame_number);
+        printf("%d: [%d] %d %c\t", i, page_table->page_table_pointer[i].validity, page_table->page_table_pointer[i].frame_number, page_table->page_table_pointer[i].reference==1?'R':' ');
     }
     printf("\n");
-}
-
-void init_memory(int* page_frames, int total_frame) {
-    for (int i=0; i<total_frame; i++) {
-        page_frames[i] = NOT_OCCUPIED;
-    }
 }
 
 virtual_memory_t* create_virtual_memory(int memory_size, int page_size) {
@@ -85,7 +80,11 @@ virtual_memory_t* create_virtual_memory(int memory_size, int page_size) {
     memory->free_frame = memory_size/page_size;
     memory->page_tables = new_dlist(dlist_free_page_table_node, (void (*)(void *)) print_page_table);
     memory->page_frames = (int*)malloc(sizeof(memory->page_frames) * memory->total_frame);
-    init_memory(memory->page_frames, memory->total_frame);
+    memory->counter = (int*)malloc(sizeof(memory->counter) * memory->total_frame);
+    for (int i=0; i<memory->total_frame; i++) {
+        memory->page_frames[i] = NOT_OCCUPIED;
+        memory->counter[i] = 0;
+    }
     return memory;
 }
 
@@ -96,11 +95,11 @@ virtual_memory_t* create_virtual_memory(int memory_size, int page_size) {
  * @param process
  * @return
  */
-page_table_node_t* get_page_table(virtual_memory_t* memory_manager, process_t* process) {
+page_table_node_t* get_page_table(virtual_memory_t* memory_manager, int pid) {
     Node* current = memory_manager->page_tables->head;
     while (current) {
         page_table_node_t* page_table = (page_table_node_t*)current->data;
-        if (process->pid == page_table->pid) {
+        if (pid == page_table->pid) {
             return page_table;
         }
         current = current->next;
@@ -115,13 +114,14 @@ page_table_node_t* get_page_table(virtual_memory_t* memory_manager, process_t* p
  * @return
  */
 int allocate_all_free_memory(virtual_memory_t* memory_manager, process_t* process) {
-    page_table_node_t* page_table = get_page_table(memory_manager, process);
+    page_table_node_t* page_table = get_page_table(memory_manager, process->pid);
     assert(page_table);
     int newly_allocated = 0;
     while (memory_manager->free_frame > 0 && page_table->valid_page_count < page_table->page_count) {
         for (int i = 0; i < memory_manager->total_frame; i++) {
             if (memory_manager->page_frames[i] == NOT_OCCUPIED) {
                 memory_manager->page_frames[i] = page_table->pid;
+                memory_manager->counter[i] = 0;
                 map(page_table, i);
                 memory_manager->free_frame -= 1;
                 newly_allocated++;
@@ -135,12 +135,19 @@ int allocate_all_free_memory(virtual_memory_t* memory_manager, process_t* proces
     return newly_allocated;
 }
 
+int least_recent_used(virtual_memory_t* memory_manager, int skip) {
+    int victim_pid = find_the_oldest_process(memory_manager, skip);
+    int frame_number = first_page(memory_manager, victim_pid);
+    assert(frame_number>=0);
+    return frame_number;
+}
+
 void virtual_memory_allocate_memory(virtual_memory_t* memory_manager, process_t* process, int clock) {
     /* convert bytes to page counts */
     int page_required = byteToRequiredPage(process->memory, memory_manager->page_size);
     int allocation_target = page_required>MIN_PAGE_REQUIRED_TO_RUN?MIN_PAGE_REQUIRED_TO_RUN: page_required;
 
-    page_table_node_t* allocated = get_page_table(memory_manager, process);
+    page_table_node_t* allocated = get_page_table(memory_manager, process->pid);
 
     /* Create a page table for the process if not exist */
     if (!allocated) {
@@ -156,9 +163,8 @@ void virtual_memory_allocate_memory(virtual_memory_t* memory_manager, process_t*
 
     /* Evict pages if memory allocated isn't enough for execution */
     while (allocated->valid_page_count < allocation_target){
-        page_table_node_t* page = find_the_oldest_process(memory_manager, process);
-        assert(page->pid != process->pid);
-        to_print[index++] = deallocate_one_page(memory_manager, page);
+        int victim = least_recent_used(memory_manager, allocated->pid);
+        to_print[index++] = evict_one_page(memory_manager, victim);
         allocate_all_free_memory(memory_manager, process);
     }
     if (evict_page_count > 0) {
@@ -171,11 +177,11 @@ void virtual_memory_allocate_memory(virtual_memory_t* memory_manager, process_t*
 }
 
 /*
- * Returns the page table of the oldest process in memory
+ * Returns the pid of the least recently executed process in memory
  * @param memory_manager
  * @return
  */
-page_table_node_t* find_the_oldest_process(virtual_memory_t* memory_manager, process_t* process) {
+int find_the_oldest_process(virtual_memory_t* memory_manager, int skip) {
     assert(memory_manager);
     int max_time = INT_MAX;
     page_table_node_t* page_table_to_return = NULL;
@@ -183,23 +189,44 @@ page_table_node_t* find_the_oldest_process(virtual_memory_t* memory_manager, pro
 
     while (current) {
         page_table_node_t* page_table = (page_table_node_t*)current->data;
-        if (page_table->pid != process->pid && page_table->valid_page_count > 0 && page_table->last_access < max_time) {
+        if (page_table->pid != skip && page_table->valid_page_count > 0 && page_table->last_access < max_time) {
             max_time = page_table->last_access;
             page_table_to_return = page_table;
         }
         current = current->next;
     }
     assert(page_table_to_return);
-    return page_table_to_return;
+    return page_table_to_return->pid;
 }
 
-int next_frame_to_deallocate(virtual_memory_t* memory_manager, int pid) {
+/**
+ * Return the frame number of the first frame of a process in memory
+ * @param memory_manager
+ * @param pid
+ * @return
+ */
+int first_page(virtual_memory_t* memory_manager, int pid) {
     for (int i=0; i<memory_manager->total_frame; i++) {
         // Find a page that's mapped into a page frame
         if (memory_manager->page_frames[i] == pid) {
             return i;
         }
     }
+    return -1;
+}
+
+int least_frequent_used_with_aging(virtual_memory_t* memory_manager) {
+    unsigned int min = 256;
+    int frame_number = -1;
+    for (int i=0; i<memory_manager->total_frame; i++) {
+        if (memory_manager->counter[i] < min) {
+            min = memory_manager->counter[i];
+            frame_number = i;
+        }
+    }
+    assert(frame_number >= 0);
+    return frame_number;
+
 }
 
 void unmap(virtual_memory_t* memory_manager, page_table_node_t* page_table, int frame_number) {
@@ -207,6 +234,7 @@ void unmap(virtual_memory_t* memory_manager, page_table_node_t* page_table, int 
         if (page_table->page_table_pointer[i].validity == 1 && page_table->page_table_pointer[i].frame_number == frame_number) {
             // Set page frame to -1, indicating not occupied
             memory_manager->page_frames[frame_number] = NOT_OCCUPIED;
+            memory_manager->counter[frame_number] = 0;
             page_table->page_table_pointer[i].validity = 0;
             page_table->page_table_pointer[i].frame_number = -1;
             page_table->valid_page_count -= 1;
@@ -215,19 +243,15 @@ void unmap(virtual_memory_t* memory_manager, page_table_node_t* page_table, int 
     }
 }
 
-int deallocate_one_page(virtual_memory_t* memory_manager, page_table_node_t* page_table) {
-    int frame_number = next_frame_to_deallocate(memory_manager, page_table->pid);
+int evict_one_page(virtual_memory_t* memory_manager, int frame_number) {
+    page_table_node_t* page_table = get_page_table(memory_manager, memory_manager->page_frames[frame_number]);
     unmap(memory_manager, page_table, frame_number);
     return frame_number;
 }
 
-void print_page_frames(virtual_memory_t* memory_manager, bool verbose) {
-    int last_pid = -1;
+void print_page_frames(virtual_memory_t* memory_manager) {
     for (int i=0; i<memory_manager->total_frame; i++) {
-        if (memory_manager->page_frames[i] != -1) {
-            printf("%d %d\n", i, memory_manager->page_frames[i]);
-            last_pid = memory_manager->page_frames[i];
-        }
+        printf("%d %d %d\n", i, memory_manager->page_frames[i], memory_manager->counter[i]);
     }
 }
 
@@ -238,12 +262,22 @@ void print_page_frames(virtual_memory_t* memory_manager, bool verbose) {
  * @param clock
  */
 void virtual_use_memory(virtual_memory_t* memory_manager, process_t* process, int clock) {
-    page_table_node_t* page_table = get_page_table(memory_manager, process);
+    page_table_node_t* page_table = get_page_table(memory_manager, process->pid);
     page_table->last_access = clock;
+    /*
+     * Set the reference bits to 1
+     */
+//    print_page_table(page_table, true);
+    for (int i=0; i<page_table->page_count; i++) {
+        page_table->page_table_pointer[i].reference = 1;
+    }
+//    print_page_table(page_table, true);
+    aging(memory_manager);
+
 }
 
 void virtual_process_info(virtual_memory_t* memory_manager, process_t* process, int clock) {
-    page_table_node_t* page_table = get_page_table(memory_manager, process);
+    page_table_node_t* page_table = get_page_table(memory_manager, process->pid);
     printf("%d, RUNNING, id=%d, remaining-time=%d, load-time=%d, mem-usage=%d%%, ",
            clock,
            process->pid,
@@ -269,7 +303,7 @@ int virtual_memory_usage(virtual_memory_t* memory_manager) {
  * @return
  */
 int virtual_memory_free_memory(virtual_memory_t* memory_manager, process_t* process, int clock) {
-    page_table_node_t* page_table= get_page_table(memory_manager, process);
+    page_table_node_t* page_table= get_page_table(memory_manager, process->pid);
     assert(page_table);
     int page_to_free = page_table->valid_page_count;
     int* to_print = malloc(sizeof(*to_print) * page_to_free);
@@ -282,6 +316,7 @@ int virtual_memory_free_memory(virtual_memory_t* memory_manager, process_t* proc
             // Set page frame to -1, indicating not occupied
             to_print[index++] = page_table->page_table_pointer[i].frame_number;
             memory_manager->page_frames[page_table->page_table_pointer[i].frame_number] = NOT_OCCUPIED;
+            memory_manager->counter[page_table->page_table_pointer[i].frame_number] = 0;
             page_table->page_table_pointer[i].frame_number = -1;
             page_table->page_table_pointer[i].validity = 0;
             page_table->valid_page_count -= 1;
@@ -300,7 +335,7 @@ int virtual_memory_free_memory(virtual_memory_t* memory_manager, process_t* proc
 }
 
 void virtual_print_addresses(virtual_memory_t* memory_manager, process_t* process) {
-    page_table_node_t* page_table = get_page_table(memory_manager, process);
+    page_table_node_t* page_table = get_page_table(memory_manager, process->pid);
     assert(page_table);
     int* addr_to_print = malloc(sizeof(*addr_to_print) * page_table->valid_page_count);
     int index = 0;
@@ -323,7 +358,7 @@ void virtual_print_addresses(virtual_memory_t* memory_manager, process_t* proces
  * @return
  */
 int virtual_require_allocation(virtual_memory_t* memory_manager, process_t* process) {
-    page_table_node_t* page_table = get_page_table(memory_manager, process);
+    page_table_node_t* page_table = get_page_table(memory_manager, process->pid);
     int page_required = byteToRequiredPage(process->memory, memory_manager->page_size);
     if (page_table) {
         /*
@@ -353,7 +388,7 @@ int virtual_require_allocation(virtual_memory_t* memory_manager, process_t* proc
  * @return
  */
 int virtual_load_time_left(virtual_memory_t* memory_manager, process_t* process) {
-    page_table_node_t* page_table = get_page_table(memory_manager, process);
+    page_table_node_t* page_table = get_page_table(memory_manager, process->pid);
     assert(page_table);
     return page_table->loading_time_left;
 }
@@ -367,7 +402,7 @@ int virtual_load_time_left(virtual_memory_t* memory_manager, process_t* process)
  *
  */
 int virtual_page_fault(virtual_memory_t* memory_manager, process_t* process) {
-    page_table_node_t* page_table = get_page_table(memory_manager, process);
+    page_table_node_t* page_table = get_page_table(memory_manager, process->pid);
     assert(page_table);
     return page_table->page_count - page_table->valid_page_count;
 }
@@ -377,10 +412,10 @@ int virtual_page_fault(virtual_memory_t* memory_manager, process_t* process) {
 memory_allocator_t* create_virtual_memory_allocator(int memory_size, int page_size) {
     memory_allocator_t* allocator = malloc(sizeof(*allocator));
     assert(allocator);
-    allocator->malloc = (void *(*)(void *, process_t *)) virtual_memory_allocate_memory;
+    allocator->malloc = (void *(*)(void *, process_t *, int)) virtual_memory_allocate_memory;
     allocator->use = (void (*)(void *, process_t *, int)) virtual_use_memory;
     allocator->info = (void (*)(void *, process_t *, int)) virtual_process_info;
-    allocator->free = (void (*)(void *, process_t *)) virtual_memory_free_memory;
+    allocator->free = (void (*)(void *, process_t *, int)) virtual_memory_free_memory;
     allocator->load = (void (*)(void *, process_t *)) virtual_memory_load_process;
     allocator->load_time_left = (int (*)(void *, process_t *)) virtual_load_time_left;
     allocator->require_allocation = (int (*)(void *, process_t *)) (int (*)(void *,
@@ -389,4 +424,53 @@ memory_allocator_t* create_virtual_memory_allocator(int memory_size, int page_si
     // Unlimited allocator doesn't have a structure to manage memory;
     allocator->structure = create_virtual_memory(memory_size, page_size);
     return allocator;
+}
+
+/* just for testing */
+void uint_to_binary(unsigned int n, char s[UINT_BIT + 1])
+{
+    unsigned int mask;
+    int i;
+
+    mask = 0x01 << UINT_BIT - 1;
+    i = 0;
+    while (mask != 0 && i < UINT_BIT) {
+        if (n & mask)
+            s[i] = '1';
+        else
+            s[i] = '0';
+        mask >>= 1;
+        i++;
+    }
+    s[i] = '\0';
+
+    return;
+}
+
+void aging(virtual_memory_t* memory_manager) {
+
+    Node* curr = memory_manager->page_tables->head;
+//    printf("--------before-----------\n");
+//    print_page_frames(memory_manager);
+//    printf("--------after--------------\n");
+    while (curr) {
+        page_table_node_t* page_table = (page_table_node_t*)curr->data;
+        assert(page_table);
+        char print[9];
+        for (int i=0; i<page_table->page_count; i++) {
+            if (page_table->page_table_pointer[i].validity) {
+                int frame_number = page_table->page_table_pointer[i].frame_number;
+                /* shift the counter 1 bit right */
+                memory_manager->counter[frame_number] >>= 0x1;
+                /* and put 1 if the R bit is 1 */
+                if (page_table->page_table_pointer[i].reference == 1) {
+                    memory_manager->counter[frame_number] |= 0x1 << 7;
+                    page_table->page_table_pointer[i].reference = 0;
+                }
+            }
+        }
+        curr = curr->next;
+    }
+//    print_page_frames(memory_manager);
+//    printf("-------------------------\n");
 }

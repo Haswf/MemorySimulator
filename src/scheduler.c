@@ -103,11 +103,6 @@ int firstComeFirstServe(memory_allocator_t* allocator, Deque* processes, Deque* 
 
         if (allocator->require_allocation(allocator->structure, process)) {
             void* allocation = allocator->malloc(allocator->structure, process, *clock);
-            if (!allocation){
-                log_warn("OOM for process %d", process->pid);
-                finish_process(process, finish, *clock, deque_size(suspended));
-                break;
-            }
         }
         allocator->info(allocator->structure, process, *clock);
 
@@ -185,64 +180,66 @@ int compare_PID(void * a, void * b) {
 }
 
 
+
 int shortestRemainingTimeFirst(memory_allocator_t* allocator, Deque* processes, Deque* finish, int* clock) {
     heap_t *suspended = create_heap(deque_size(processes), compare_remaining_time);
     Deque *pending = new_deque((void (*)(void *)) printProcess);
     while (deque_size(processes) > 0) {
         process_t *process = deque_pop(processes);
-        if (process->timeArrived > 0) {
-            deque_push(pending, process);
-        } else {
-            heap_insert(suspended, *process);
-        }
+        deque_push(pending, process);
     }
 
     while (heap_size(suspended) > 0 || deque_size(pending) > 0){
-        // Add newly arrived processes
-        heap_t* toAdd = create_heap(MAX_PROCESS_ARRIVAL_PER_TICK, compare_PID);
-        while (deque_size(pending) && next_to_pop(pending)->timeArrived == *clock) {
-            process_t* process = deque_pop(pending);
-            assert(process->timeArrived == *clock);
-            heap_insert(toAdd, *process);
-            free_process(process);
-            log_info("Process %d added to suspended", process->pid);
-            log_process(process);
-        }
-        while (heap_size(toAdd) > 0) {
-            process_t next = heap_pop_min(toAdd);
-            heap_insert(suspended, next);
-        }
+        load_new_process(suspended, pending, *clock);
+
         if (heap_size(suspended) > 0) {
-//            heap_print(suspended, printProcess);
             process_t* process = NULL;
             process_t running = heap_pop_min(suspended);
             process = &running;
+
             if (allocator->require_allocation(allocator->structure, process)){
-                void* allocation = allocator->malloc(allocator->structure, process, *clock);
+                allocator->malloc(allocator->structure, process, *clock);
             }
-//            int page_fault_time = allocator->page_fault(allocator->structure, process) > 0;
-//            process->jobTime += page_fault_time;
+            int page_fault_time = allocator->page_fault(allocator->structure, process) > 0;
+            process->remaining_time += page_fault_time;
 
-//            printf("%d, RUNNING, id=%d, remaining-time=%d\n", *clock, process->pid, process->jobTime);
+            allocator->info(allocator->structure, process, *clock);
 
-            if ((allocator->load_time_left(allocator->structure, process)) > 0) {
-                allocator->load(allocator->structure, process);
-            } else {
-                execute(process, *clock);
-                allocator->use(allocator->structure, process, *clock);
+            while (process->remaining_time > 0) {
+                if ((allocator->load_time_left(allocator->structure, process)) > 0) {
+                    allocator->load(allocator->structure, process);
+                } else {
+                    execute(process, *clock);
+                    allocator->use(allocator->structure, process, *clock);
+                }
+                tick(clock);
+                load_new_process(suspended, pending, *clock);
             }
 
-            if (running.remaining_time > 0) {
-                heap_insert(suspended, running);
-            } else {
-                allocator->free(allocator->structure, process, *clock);
-                log_info("<Scheduler> Process %d finished",process->pid);
-                process_t * copy = create_process(process->timeArrived, process->pid, process->memory, process->job_time);
-                copy->finish_time = *clock;
-                deque_insert(finish, copy);
-            }
+            allocator->free(allocator->structure, process, *clock);
+            process_t * copy = create_process(process->timeArrived, process->pid, process->memory, process->job_time);
+            copy->finish_time = *clock;
+            deque_insert(finish, copy);
+        } else {
+            tick(clock);
         }
-        tick(clock);
+    }
+}
+
+void load_new_process(heap_t* suspended, Deque* pending, int clock) {
+    // Add newly arrived processes
+    heap_t* toAdd = create_heap(MAX_PROCESS_ARRIVAL_PER_TICK, compare_PID);
+    while (deque_size(pending) && next_to_pop(pending)->timeArrived == clock) {
+        process_t* process = deque_pop(pending);
+        assert(process->timeArrived == clock);
+        heap_insert(toAdd, *process);
+        free_process(process);
+        log_info("Process %d added to suspended", process->pid);
+        log_process(process);
+    }
+    while (heap_size(toAdd) > 0) {
+        process_t next = heap_pop_min(toAdd);
+        heap_insert(suspended, next);
     }
 }
 

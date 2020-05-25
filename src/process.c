@@ -1,6 +1,7 @@
 //
 // Created by Haswell on 18/05/2020.
 //
+#include "stdbool.h"
 #include "process.h"
 
 void output_finish(int clock, process_t* process, int proc_remaining) {
@@ -34,8 +35,7 @@ void free_process(process_t* process) {
     }
 }
 
+
 void dlist_free_process(void* process) {
     free(process);
 }
-
-#include "process.h"

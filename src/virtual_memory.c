@@ -135,12 +135,28 @@ int allocate_all_free_memory(virtual_memory_t* memory_manager, process_t* proces
     return newly_allocated;
 }
 
-int least_recent_used(virtual_memory_t* memory_manager, int skip) {
-    int victim_pid = find_the_oldest_process(memory_manager, skip);
+int LRU(virtual_memory_t* memory_manager, int ignore) {
+    int victim_pid = find_the_oldest_process(memory_manager, ignore);
     int frame_number = first_page(memory_manager, victim_pid);
     assert(frame_number>=0);
     return frame_number;
 }
+
+int LFU(virtual_memory_t* memory_manager, int ignore) {
+    int victim_pid = -1;
+    int min_freq = INT_MAX;
+    for (int i=0; i<memory_manager->total_frame; i++) {
+        if (memory_manager->counter[i] < min_freq && memory_manager->page_frames[i] != ignore) {
+            min_freq = memory_manager->counter[i] < min_freq;
+            victim_pid = memory_manager->page_frames[i];
+        }
+    }
+
+    int frame_number = first_page(memory_manager, victim_pid);
+    assert(frame_number>=0);
+    return frame_number;
+}
+
 
 void virtual_memory_allocate_memory(virtual_memory_t* memory_manager, process_t* process, int clock) {
     /* convert bytes to page counts */
@@ -163,7 +179,9 @@ void virtual_memory_allocate_memory(virtual_memory_t* memory_manager, process_t*
 
     /* Evict pages if memory allocated isn't enough for execution */
     while (allocated->valid_page_count < allocation_target){
-        int victim = least_recent_used(memory_manager, allocated->pid);
+        int victim = LFU(memory_manager, allocated->pid);
+//        int victim = LRU(memory_manager, allocated->pid);
+
         to_print[index++] = evict_one_page(memory_manager, victim);
         allocate_all_free_memory(memory_manager, process);
     }

@@ -158,7 +158,42 @@ int LFU(virtual_memory_t* memory_manager, int ignore) {
 }
 
 
-void virtual_memory_allocate_memory(virtual_memory_t* memory_manager, process_t* process, int clock) {
+void virtual_memory_allocate_memory_LRU(virtual_memory_t* memory_manager, process_t* process, int clock) {
+    /* convert bytes to page counts */
+    int page_required = byteToRequiredPage(process->memory, memory_manager->page_size);
+    int allocation_target = page_required>MIN_PAGE_REQUIRED_TO_RUN?MIN_PAGE_REQUIRED_TO_RUN: page_required;
+
+    page_table_node_t* allocated = get_page_table(memory_manager, process->pid);
+
+    /* Create a page table for the process if not exist */
+    if (!allocated) {
+        allocated = create_page_table_node(process->pid, page_required);
+        dlist_add_end(memory_manager->page_tables, allocated);
+    }
+    allocate_all_free_memory(memory_manager, process);;
+
+    /* The number of pages must be evicted to let the process run */
+    int evict_page_count = allocation_target - allocated->valid_page_count;
+    int* to_print = malloc(sizeof(*to_print) * evict_page_count);
+    int index = 0;
+
+    /* Evict pages if memory allocated isn't enough for execution */
+    while (allocated->valid_page_count < allocation_target){
+        int victim = LRU(memory_manager, allocated->pid);
+
+        to_print[index++] = evict_one_page(memory_manager, victim);
+        allocate_all_free_memory(memory_manager, process);
+    }
+    if (evict_page_count > 0) {
+        printf("%d, EVICTED, mem-addresses=", clock);
+        print_memory(to_print, evict_page_count);
+        printf("\n");
+    }
+    free(to_print);
+    log_trace("<Memory> %d pages allocated for process %d. Loading requires %d ticks", allocated->valid_page_count, allocated->page_count, process->pid, allocated->loading_time_left);
+}
+
+void virtual_memory_allocate_memory_LFU(virtual_memory_t* memory_manager, process_t* process, int clock) {
     /* convert bytes to page counts */
     int page_required = byteToRequiredPage(process->memory, memory_manager->page_size);
     int allocation_target = page_required>MIN_PAGE_REQUIRED_TO_RUN?MIN_PAGE_REQUIRED_TO_RUN: page_required;
@@ -180,7 +215,6 @@ void virtual_memory_allocate_memory(virtual_memory_t* memory_manager, process_t*
     /* Evict pages if memory allocated isn't enough for execution */
     while (allocated->valid_page_count < allocation_target){
         int victim = LFU(memory_manager, allocated->pid);
-//        int victim = LRU(memory_manager, allocated->pid);
 
         to_print[index++] = evict_one_page(memory_manager, victim);
         allocate_all_free_memory(memory_manager, process);
@@ -193,7 +227,6 @@ void virtual_memory_allocate_memory(virtual_memory_t* memory_manager, process_t*
     free(to_print);
     log_trace("<Memory> %d pages allocated for process %d. Loading requires %d ticks", allocated->valid_page_count, allocated->page_count, process->pid, allocated->loading_time_left);
 }
-
 /*
  * Returns the pid of the least recently executed process in memory
  * @param memory_manager
@@ -427,10 +460,10 @@ int virtual_page_fault(virtual_memory_t* memory_manager, process_t* process) {
 
 
 
-memory_allocator_t* create_virtual_memory_allocator(int memory_size, int page_size) {
+memory_allocator_t* create_virtual_memory_allocator_LRU(int memory_size, int page_size) {
     memory_allocator_t* allocator = malloc(sizeof(*allocator));
     assert(allocator);
-    allocator->malloc = (void *(*)(void *, process_t *, int)) virtual_memory_allocate_memory;
+    allocator->malloc = (void *(*)(void *, process_t *, int)) virtual_memory_allocate_memory_LRU;
     allocator->use = (void (*)(void *, process_t *, int)) virtual_use_memory;
     allocator->info = (void (*)(void *, process_t *, int)) virtual_process_info;
     allocator->free = (void (*)(void *, process_t *, int)) virtual_memory_free_memory;
@@ -438,6 +471,23 @@ memory_allocator_t* create_virtual_memory_allocator(int memory_size, int page_si
     allocator->load_time_left = (int (*)(void *, process_t *)) virtual_load_time_left;
     allocator->require_allocation = (int (*)(void *, process_t *)) (int (*)(void *,
                                                                              process_t *)) virtual_require_allocation;
+    allocator->page_fault = (int (*)(void *, process_t *)) virtual_page_fault;
+    // Unlimited allocator doesn't have a structure to manage memory;
+    allocator->structure = create_virtual_memory(memory_size, page_size);
+    return allocator;
+}
+
+memory_allocator_t* create_virtual_memory_allocator_LFU(int memory_size, int page_size) {
+    memory_allocator_t* allocator = malloc(sizeof(*allocator));
+    assert(allocator);
+    allocator->malloc = (void *(*)(void *, process_t *, int)) virtual_memory_allocate_memory_LFU;
+    allocator->use = (void (*)(void *, process_t *, int)) virtual_use_memory;
+    allocator->info = (void (*)(void *, process_t *, int)) virtual_process_info;
+    allocator->free = (void (*)(void *, process_t *, int)) virtual_memory_free_memory;
+    allocator->load = (void (*)(void *, process_t *)) virtual_memory_load_process;
+    allocator->load_time_left = (int (*)(void *, process_t *)) virtual_load_time_left;
+    allocator->require_allocation = (int (*)(void *, process_t *)) (int (*)(void *,
+                                                                            process_t *)) virtual_require_allocation;
     allocator->page_fault = (int (*)(void *, process_t *)) virtual_page_fault;
     // Unlimited allocator doesn't have a structure to manage memory;
     allocator->structure = create_virtual_memory(memory_size, page_size);

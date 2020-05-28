@@ -50,9 +50,12 @@ int evict_one_page(virtual_memory_t* memory_manager, int frame_number);
 page_table_node_t* create_page_table_node(int pid, int page_count);
 virtual_memory_t* create_virtual_memory(int memory_size, int page_size);
 int find_the_oldest_process(virtual_memory_t* memory_manager, int skip);
+void virtual_memory_allocate_memory_LRU(virtual_memory_t* memory_manager, process_t* process, int clock);
+void virtual_memory_allocate_memory_LFU(virtual_memory_t* memory_manager, process_t* process, int clock);
 
 int least_recent_used(virtual_memory_t* memory_manager, int skip);
-memory_allocator_t* create_virtual_memory_allocator(int memory_size, int page_size);
+memory_allocator_t* create_virtual_memory_allocator_LFU(int memory_size, int page_size);
+memory_allocator_t* create_virtual_memory_allocator_LRU(int memory_size, int page_size);
 void print_memory(int* addresses, int count);
 int map(page_table_node_t * page_table, int frame_number);
 int virtual_memory_usage(virtual_memory_t* memory_manager);

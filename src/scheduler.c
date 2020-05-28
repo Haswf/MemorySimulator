@@ -275,7 +275,7 @@ int main(int argc, char *argv[]) {
                     memory_allocation = SWAPPING;
                 } else if (strcasecmp(optarg, "v") == 0) {
                     memory_allocation = VIRTUAL_MEMORY;
-                } else if (strcasecmp(optarg, "v") == 0) {
+                } else if (strcasecmp(optarg, "cm") == 0) {
                     memory_allocation = CUSTOMISED_MEMORY;
                 }
                 break;
@@ -303,7 +303,9 @@ int main(int argc, char *argv[]) {
     } else if (memory_allocation == SWAPPING) {
         allocator = create_swapping_allocator(memory_size, PAGE_SIZE);
     } else if (memory_allocation == VIRTUAL_MEMORY) {
-        allocator = create_virtual_memory_allocator(memory_size, PAGE_SIZE);
+        allocator = create_virtual_memory_allocator_LRU(memory_size, PAGE_SIZE);
+    } else {
+        allocator = create_virtual_memory_allocator_LFU(memory_size, PAGE_SIZE);
     }
 
     Deque *processes = new_deque((void (*)(void *)) printProcess);

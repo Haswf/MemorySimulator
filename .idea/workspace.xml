@@ -1,0 +1,486 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
+  <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
+    <generated>
+      <config projectName="scheduler" targetName="scheduler" />
+    </generated>
+  </component>
+  <component name="CMakeSettings" AUTO_RELOAD="true">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="779d517e-22af-4973-a94d-126a165a96a4" name="Default Changelist" comment="fix: Fixed potential negative malloc size">
+      <change beforePath="$PROJECT_DIR$/scheduler" beforeDir="false" afterPath="$PROJECT_DIR$/scheduler" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/virtual_memory.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/virtual_memory.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/virtual_memory.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/virtual_memory.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/testcase.txt" beforeDir="false" afterPath="$PROJECT_DIR$/testcase.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/testcase_generator.py" beforeDir="false" afterPath="$PROJECT_DIR$/testcase_generator.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RESET_MODE" value="HARD" />
+  </component>
+  <component name="ProjectId" id="1c2WFzQVyh7MBpU1vH7ip5YzXOm" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="ToolWindowRun.ShowToolbar" value="false" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="cf.first.check.clang-format" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/src" />
+    <property name="restartRequiresConfirmation" value="false" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Git\comp30023-2020-project-2\src" />
+      <recent name="C:\Git\comp30023-2020-project-2" />
+      <recent name="C:\Git\comp30023-2020-project-2\cmake-build-debug" />
+      <recent name="C:\Git\comp30023-2020-project-2\cmake-build-debug\CMakeFiles" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Git\comp30023-2020-project-2" />
+      <recent name="C:\Git\comp30023-2020-project-2\src" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="scheduler" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="./scheduler -f testcase.txt -a rr -s 100 -m cm -q 10" REDIRECT_INPUT="false" WORKING_DIR="file://.." PASS_PARENT_ENVS_2="true" PROJECT_NAME="scheduler" TARGET_NAME="scheduler" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="scheduler" RUN_TARGET_NAME="scheduler">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="779d517e-22af-4973-a94d-126a165a96a4" name="Default Changelist" comment="" />
+      <created>1589727068398</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1589727068398</updated>
+      <workItem from="1589727069781" duration="11856000" />
+      <workItem from="1589782194681" duration="9549000" />
+      <workItem from="1589792195677" duration="28964000" />
+      <workItem from="1589870905276" duration="1007000" />
+      <workItem from="1589890406829" duration="909000" />
+      <workItem from="1589960630074" duration="6431000" />
+      <workItem from="1589969811988" duration="14015000" />
+      <workItem from="1589984027689" duration="11509000" />
+      <workItem from="1590038305657" duration="2131000" />
+      <workItem from="1590073915151" duration="24388000" />
+      <workItem from="1590130579665" duration="10183000" />
+      <workItem from="1590225496108" duration="29794000" />
+      <workItem from="1590299213772" duration="718000" />
+      <workItem from="1590300037765" duration="45000" />
+      <workItem from="1590300645692" duration="4518000" />
+      <workItem from="1590395223825" duration="2326000" />
+      <workItem from="1590403118820" duration="11657000" />
+      <workItem from="1590418823894" duration="262000" />
+      <workItem from="1590479151270" duration="1556000" />
+      <workItem from="1590490706598" duration="1303000" />
+      <workItem from="1590587123940" duration="748000" />
+      <workItem from="1590668746800" duration="8607000" />
+      <workItem from="1590741126685" duration="11425000" />
+    </task>
+    <task id="LOCAL-00001" summary="feat(process.c scheduler.c): Implement argument parsing and load process from file">
+      <created>1589733108906</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1589733108906</updated>
+    </task>
+    <task id="LOCAL-00002" summary="feat(process.c scheduler.c): Implement argument parsing and load process from file">
+      <created>1589733119464</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1589733119464</updated>
+    </task>
+    <task id="LOCAL-00003" summary="feat: Implemented Shortest Remaining First Algorithm">
+      <created>1589787925686</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1589787925686</updated>
+    </task>
+    <task id="LOCAL-00004" summary="feat: Use heap to sort processes">
+      <created>1589793012426</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1589793012427</updated>
+    </task>
+    <task id="LOCAL-00005" summary="feat: Implemented structure for memory management">
+      <created>1589823294341</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1589823294341</updated>
+    </task>
+    <task id="LOCAL-00006" summary="feat: Added swapping for FCFS">
+      <created>1589834122876</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1589834122876</updated>
+    </task>
+    <task id="LOCAL-00007" summary="feat: Add proper logging">
+      <created>1589967684806</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1589967684806</updated>
+    </task>
+    <task id="LOCAL-00008" summary="feat: Add time to log">
+      <created>1589968870149</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1589968870149</updated>
+    </task>
+    <task id="LOCAL-00009" summary="feat: Use pages in memory list">
+      <created>1589975943205</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1589975943205</updated>
+    </task>
+    <task id="LOCAL-00010" summary="feat: Integrate scheduler with memory allocator">
+      <created>1589987595301</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1589987595302</updated>
+    </task>
+    <task id="LOCAL-00011" summary="fix: Fix bug in heap implementation">
+      <created>1589992272882</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1589992272882</updated>
+    </task>
+    <task id="LOCAL-00012" summary="feat: Implemented virtual memory">
+      <created>1590091490946</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1590091490946</updated>
+    </task>
+    <task id="LOCAL-00013" summary="fix: Attempt to fix testcase 6">
+      <created>1590097284244</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1590097284244</updated>
+    </task>
+    <task id="LOCAL-00014" summary="refactor: Refactor argument parsing">
+      <created>1590141168030</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1590141168030</updated>
+    </task>
+    <task id="LOCAL-00015" summary="fix: Fix page evicting order">
+      <created>1590245909239</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1590245909239</updated>
+    </task>
+    <task id="LOCAL-00016" summary="feat: Implment performance statistic">
+      <created>1590253776531</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1590253776531</updated>
+    </task>
+    <task id="LOCAL-00017" summary="fix: Fixed throughtput calculation">
+      <created>1590259046724</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1590259046724</updated>
+    </task>
+    <task id="LOCAL-00018" summary="feat: upload Makefile">
+      <created>1590259273591</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1590259273591</updated>
+    </task>
+    <task id="LOCAL-00019" summary="feat: upload CI config">
+      <created>1590259468836</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1590259468836</updated>
+    </task>
+    <task id="LOCAL-00020" summary="fix: Fixed segmentation fault">
+      <created>1590260343857</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1590260343857</updated>
+    </task>
+    <task id="LOCAL-00021" summary="feat: Implement LFU and aging">
+      <created>1590415998527</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1590415998527</updated>
+    </task>
+    <task id="LOCAL-00022" summary="feat: Implment Least frequent used algorithm">
+      <created>1590419050073</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1590419050073</updated>
+    </task>
+    <task id="LOCAL-00023" summary="feat: Upload Benchmark files">
+      <created>1590708171934</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1590708171934</updated>
+    </task>
+    <task id="LOCAL-00024" summary="feat: Changed int to unsigned long int">
+      <created>1590744228169</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1590744228169</updated>
+    </task>
+    <task id="LOCAL-00025" summary="fix: Fixed mem issue">
+      <created>1590745402898</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1590745402898</updated>
+    </task>
+    <task id="LOCAL-00026" summary="fix: Fixed potential negative malloc size">
+      <created>1590746351449</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1590746351449</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="2" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+    <MESSAGE value="feat(process.c scheduler.c): Implement argument parsing and load process from file" />
+    <MESSAGE value="feat: Implemented Shortest Remaining First Algorithm" />
+    <MESSAGE value="feat: Use heap to sort processes" />
+    <MESSAGE value="feat: Implemented structure for memory management" />
+    <MESSAGE value="feat: Added swapping for FCFS" />
+    <MESSAGE value="feat: Add proper logging" />
+    <MESSAGE value="feat: Add time to log" />
+    <MESSAGE value="feat: Use pages in memory list" />
+    <MESSAGE value="feat: Integrate scheduler with memory allocator" />
+    <MESSAGE value="fix: Fix bug in heap implementation" />
+    <MESSAGE value="feat: Implemented virtual memory" />
+    <MESSAGE value="fix: Attempt to fix testcase 6" />
+    <MESSAGE value="refactor: Refactor argument parsing" />
+    <MESSAGE value="fix: Fix page evicting order" />
+    <MESSAGE value="feat: Implment performance statistic" />
+    <MESSAGE value="fix: Fixed throughtput calculation" />
+    <MESSAGE value="feat: upload Makefile" />
+    <MESSAGE value="feat: upload CI config" />
+    <MESSAGE value="fix: Fixed segmentation fault" />
+    <MESSAGE value="feat: Implement LFU and aging" />
+    <MESSAGE value="feat: Implment Least frequent used algorithm" />
+    <MESSAGE value="feat: Upload Benchmark files" />
+    <MESSAGE value="feat: Changed int to unsigned long int" />
+    <MESSAGE value="fix: Fixed mem issue" />
+    <MESSAGE value="fix: Fixed potential negative malloc size" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: Fixed potential negative malloc size" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="505" y="269" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1590748494391">
+      <screen x="0" y="0" width="2194" height="1194" />
+    </state>
+    <state x="871" y="201" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590417489323" />
+    <state x="505" y="269" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.2194.1194@0.0.2194.1194" timestamp="1590748494391" />
+    <state x="828" y="399" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1590748339363">
+      <screen x="0" y="0" width="2194" height="1194" />
+    </state>
+    <state x="828" y="399" key="#com.intellij.fileTypes.FileTypeChooser/0.0.2194.1194@0.0.2194.1194" timestamp="1590748339363" />
+    <state x="1196" y="251" key="#com.intellij.ide.macro.MacrosDialog" timestamp="1590225893283">
+      <screen x="0" y="0" width="2194" height="1194" />
+    </state>
+    <state x="1196" y="251" key="#com.intellij.ide.macro.MacrosDialog/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590225893283" />
+    <state x="828" y="344" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1590748217650">
+      <screen x="0" y="0" width="2194" height="1194" />
+    </state>
+    <state x="828" y="344" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590307378180" />
+    <state x="828" y="344" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.2194.1194@0.0.2194.1194" timestamp="1590748217650" />
+    <state x="981" y="350" key="#xdebugger.XInspectDialog" timestamp="1590260092521">
+      <screen x="0" y="0" width="2194" height="1194" />
+    </state>
+    <state x="981" y="350" key="#xdebugger.XInspectDialog/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590260092521" />
+    <state x="853" y="300" key="#xdebugger.evaluate" timestamp="1590256637506">
+      <screen x="0" y="0" width="2194" height="1194" />
+    </state>
+    <state x="853" y="300" key="#xdebugger.evaluate/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590256637506" />
+    <state width="406" height="466" key="DebuggerActiveHint" timestamp="1590744519902">
+      <screen x="0" y="0" width="2194" height="1194" />
+    </state>
+    <state width="406" height="466" key="DebuggerActiveHint/0.0.2194.1194@0.0.2194.1194" timestamp="1590744519902" />
+    <state x="1284" y="296" key="EnvironmentVariablesDialog" timestamp="1590225906311">
+      <screen x="0" y="0" width="2194" height="1194" />
+    </state>
+    <state x="1284" y="296" key="EnvironmentVariablesDialog/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590225906311" />
+    <state x="877" y="353" key="FileChooserDialogImpl" timestamp="1590416615173">
+      <screen x="0" y="0" width="2194" height="1194" />
+    </state>
+    <state x="877" y="353" key="FileChooserDialogImpl/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590416615173" />
+    <state x="543" y="411" width="1135" height="682" key="GrepConsoleSettings" timestamp="1590225983428">
+      <screen x="0" y="0" width="2194" height="1194" />
+    </state>
+    <state x="543" y="411" width="1135" height="682" key="GrepConsoleSettings/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590225983428" />
+    <state x="972" y="679" key="GrepConsoleSound" timestamp="1590225973061">
+      <screen x="0" y="0" width="2194" height="1194" />
+    </state>
+    <state x="972" y="679" key="GrepConsoleSound/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590225973061" />
+    <state x="741" y="514" width="738" height="572" key="GrepConsoleStreamBufferSettingsDialog" timestamp="1590225683911">
+      <screen x="0" y="0" width="2194" height="1194" />
+    </state>
+    <state x="741" y="514" width="738" height="572" key="GrepConsoleStreamBufferSettingsDialog/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590225683911" />
+    <state x="836" y="572" key="GrepConsoleTailFileDialog" timestamp="1590225669268">
+      <screen x="0" y="0" width="2194" height="1194" />
+    </state>
+    <state x="836" y="572" key="GrepConsoleTailFileDialog/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590225669268" />
+    <state width="2136" height="370" key="GridCell.Tab.0.bottom" timestamp="1590752499325">
+      <screen x="0" y="0" width="2194" height="1194" />
+    </state>
+    <state width="2151" height="872" key="GridCell.Tab.0.bottom/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590417477258" />
+    <state width="2136" height="370" key="GridCell.Tab.0.bottom/0.0.2194.1194@0.0.2194.1194" timestamp="1590752499325" />
+    <state width="2136" height="370" key="GridCell.Tab.0.center" timestamp="1590752499325">
+      <screen x="0" y="0" width="2194" height="1194" />
+    </state>
+    <state width="2151" height="872" key="GridCell.Tab.0.center/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590417477258" />
+    <state width="2136" height="370" key="GridCell.Tab.0.center/0.0.2194.1194@0.0.2194.1194" timestamp="1590752499325" />
+    <state width="2136" height="370" key="GridCell.Tab.0.left" timestamp="1590752499324">
+      <screen x="0" y="0" width="2194" height="1194" />
+    </state>
+    <state width="2151" height="872" key="GridCell.Tab.0.left/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590417477258" />
+    <state width="2136" height="370" key="GridCell.Tab.0.left/0.0.2194.1194@0.0.2194.1194" timestamp="1590752499324" />
+    <state width="2136" height="370" key="GridCell.Tab.0.right" timestamp="1590752499325">
+      <screen x="0" y="0" width="2194" height="1194" />
+    </state>
+    <state width="2151" height="872" key="GridCell.Tab.0.right/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590417477258" />
+    <state width="2136" height="370" key="GridCell.Tab.0.right/0.0.2194.1194@0.0.2194.1194" timestamp="1590752499325" />
+    <state width="2136" height="370" key="GridCell.Tab.1.bottom" timestamp="1590752498803">
+      <screen x="0" y="0" width="2194" height="1194" />
+    </state>
+    <state width="2151" height="888" key="GridCell.Tab.1.bottom/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590416987909" />
+    <state width="2136" height="370" key="GridCell.Tab.1.bottom/0.0.2194.1194@0.0.2194.1194" timestamp="1590752498803" />
+    <state width="2136" height="370" key="GridCell.Tab.1.center" timestamp="1590752498802">
+      <screen x="0" y="0" width="2194" height="1194" />
+    </state>
+    <state width="2151" height="888" key="GridCell.Tab.1.center/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590416987909" />
+    <state width="2136" height="370" key="GridCell.Tab.1.center/0.0.2194.1194@0.0.2194.1194" timestamp="1590752498802" />
+    <state width="2136" height="370" key="GridCell.Tab.1.left" timestamp="1590752498802">
+      <screen x="0" y="0" width="2194" height="1194" />
+    </state>
+    <state width="2151" height="888" key="GridCell.Tab.1.left/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590416987909" />
+    <state width="2136" height="370" key="GridCell.Tab.1.left/0.0.2194.1194@0.0.2194.1194" timestamp="1590752498802" />
+    <state width="2136" height="370" key="GridCell.Tab.1.right" timestamp="1590752498802">
+      <screen x="0" y="0" width="2194" height="1194" />
+    </state>
+    <state width="2151" height="888" key="GridCell.Tab.1.right/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590416987909" />
+    <state width="2136" height="370" key="GridCell.Tab.1.right/0.0.2194.1194@0.0.2194.1194" timestamp="1590752498802" />
+    <state x="925" y="300" key="RollbackChangesDialog" timestamp="1590704272887">
+      <screen x="0" y="0" width="2194" height="1194" />
+    </state>
+    <state x="925" y="300" key="RollbackChangesDialog/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590308038308" />
+    <state x="925" y="300" key="RollbackChangesDialog/0.0.2194.1194@0.0.2194.1194" timestamp="1590704272887" />
+    <state x="606" y="243" width="981" height="708" key="SettingsEditor" timestamp="1590706454829">
+      <screen x="0" y="0" width="2194" height="1194" />
+    </state>
+    <state x="606" y="243" key="SettingsEditor/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1589987674925" />
+    <state x="606" y="243" width="981" height="708" key="SettingsEditor/0.0.2194.1194@0.0.2194.1194" timestamp="1590706454829" />
+    <state x="938" y="295" key="VCS.ChangeListViewerDialog" timestamp="1590235493732">
+      <screen x="0" y="0" width="2194" height="1194" />
+    </state>
+    <state x="938" y="295" key="VCS.ChangeListViewerDialog/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590235493732" />
+    <state x="690" y="330" key="Vcs.Push.Dialog.v2" timestamp="1590746353517">
+      <screen x="0" y="0" width="2194" height="1194" />
+    </state>
+    <state x="690" y="330" key="Vcs.Push.Dialog.v2/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590416024619" />
+    <state x="690" y="330" key="Vcs.Push.Dialog.v2/0.0.2194.1194@0.0.2194.1194" timestamp="1590746353517" />
+    <state x="93" y="93" width="2008" height="1008" key="com.intellij.history.integration.ui.views.FileHistoryDialog" timestamp="1590702957071">
+      <screen x="0" y="0" width="2194" height="1194" />
+    </state>
+    <state x="93" y="93" width="2008" height="1008" key="com.intellij.history.integration.ui.views.FileHistoryDialog/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590251913943" />
+    <state x="93" y="93" width="2008" height="1008" key="com.intellij.history.integration.ui.views.FileHistoryDialog/0.0.2194.1194@0.0.2194.1194" timestamp="1590702957071" />
+    <state x="822" y="382" key="refactoring.ChangeSignatureDialog" timestamp="1589800872197">
+      <screen x="0" y="0" width="2194" height="1194" />
+    </state>
+    <state x="822" y="382" key="refactoring.ChangeSignatureDialog/0.0.2194.1194@0.0.2194.1194" timestamp="1589800872197" />
+    <state x="754" y="279" key="run.anything.popup" timestamp="1590260200865">
+      <screen x="0" y="0" width="2194" height="1194" />
+    </state>
+    <state x="754" y="279" key="run.anything.popup/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590260200865" />
+    <state x="760" y="264" width="672" height="678" key="search.everywhere.popup" timestamp="1590414149194">
+      <screen x="0" y="0" width="2194" height="1194" />
+    </state>
+    <state x="760" y="264" width="672" height="678" key="search.everywhere.popup/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590414149194" />
+    <state x="760" y="264" width="672" height="678" key="search.everywhere.popup/0.0.2194.1194@0.0.2194.1194" timestamp="1589782610742" />
+  </component>
+</project>

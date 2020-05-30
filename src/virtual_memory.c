@@ -275,7 +275,8 @@ int least_frequent_used_with_aging(virtual_memory_t* memory_manager) {
             frame_number = i;
         }
     }
-    assert(frame_number >= 0);
+    assert(frame_number >= 0);:`
+
     return frame_number;
 
 }

@@ -1,3 +1,0 @@
-/mnt/c/Git/comp30023-2020-project-2/cmake-build-debug/CMakeFiles/edit_cache.dir
-/mnt/c/Git/comp30023-2020-project-2/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/mnt/c/Git/comp30023-2020-project-2/cmake-build-debug/CMakeFiles/scheduler.dir

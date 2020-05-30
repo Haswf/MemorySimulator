@@ -1,4 +1,0 @@
-/usr/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /mnt/c/Git/comp30023-2020-project-2
--- Configuring done
--- Generating done
--- Build files have been written to: /mnt/c/Git/comp30023-2020-project-2/cmake-build-debug

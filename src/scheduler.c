@@ -61,10 +61,10 @@ void execute(process_t* process, long long int clock) {
     static process_t* last = NULL;
     process->remaining_time--;
     if (process!=last) {
-        fprintf(stderr, "<Scheduler> process %lld start executing, ETA: %lld ticks", process->pid, process->remaining_time);
+        fprintf(stderr, "<Scheduler> process %lld start executing, ETA: %lld ticks\n", process->pid, process->remaining_time);
         last = process;
     }
-    fprintf(stderr, "<Scheduler> process %lld is running, ETA: %lld ticks", process->pid, process->remaining_time);
+    fprintf(stderr, "<Scheduler> process %lld is running, ETA: %lld ticks\n", process->pid, process->remaining_time);
 }
 
 /**
@@ -86,7 +86,7 @@ long long int load_process(Deque* pending, Deque* suspended, long long int clock
 
     while (heap_size(toAdd) > 0) {
         process_t next_process = heap_pop_min(toAdd);
-        fprintf(stderr, "<Scheduler> Process %lld inserted to suspended queue", next_process.pid);
+        fprintf(stderr, "<Scheduler> Process %lld inserted to suspended queue\n", next_process.pid);
         process_t* next = create_process(next_process.timeArrived, next_process.pid, next_process.memory, next_process.job_time);
         deque_insert(suspended, next);
         count++;
@@ -364,7 +364,7 @@ void load_new_process(heap_t* suspended, Deque* pending, long long int clock) {
         assert(process->timeArrived == clock);
         heap_insert(toAdd, *process);
         free_process(process);
-        fprintf(stderr, "Process %lld added to suspended", process->pid);
+        fprintf(stderr, "Process %lld added to suspended\n", process->pid);
         log_process(process);
     }
     while (heap_size(toAdd) > 0) {

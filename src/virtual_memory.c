@@ -61,7 +61,7 @@ void virtual_memory_load_process(virtual_memory_t* memory_manager, process_t* pr
         page_table_node_t* page_table = (page_table_node_t*)current->data;
         if (page_table->pid == process->pid) {
             page_table->loading_time_left -= 1;
-            fprintf(stderr, "Process %lld is loading. ETA: %lld ticks", process->pid, page_table->loading_time_left);
+            fprintf(stderr, "Process %lld is loading. ETA: %lld ticks\n", process->pid, page_table->loading_time_left);
             return;
         }
         current = current->next;

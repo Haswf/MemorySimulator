@@ -52,7 +52,7 @@ Node* first_fit(memory_list_t* memoryList, process_t* process) {
     while (current) {
         memory_fragment_t* fragment = (memory_fragment_t*) current->data;
         if (fragment->type == HOLE_FRAGMENT && fragment->page_length >= pages_required) {
-            fprintf(stderr, "<MEMORY> First fit for pid %lld (%lld pages) is at %lld", process->pid, pages_required, fragment->page_start);
+            fprintf(stderr, "<MEMORY> First fit for pid %lld (%lld pages) is at %lld\n", process->pid, pages_required, fragment->page_start);
             return current;
         }
         current = current->next;
@@ -150,7 +150,7 @@ void swapping_load_memory(memory_list_t* memoryList, process_t* process) {
         if (fragment->type == PROCESS_FRAGMENT) {
             if (fragment->pid == process->pid && fragment->load_time > 0) {
                 fragment->load_time -= 1;
-                fprintf(stderr, "<Scheduler> Loading pages for process %lld ETA: %lld ticks", process->pid, fragment->load_time);
+                fprintf(stderr, "<Scheduler> Loading pages for process %lld ETA: %lld ticks\n", process->pid, fragment->load_time);
             }
         }
         current = current->next;

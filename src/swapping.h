@@ -14,6 +14,8 @@
 #include <stdbool.h>
 #include "memory_allocator.h"
 #include "../test/swapping_test.h"
+#include "virtual_memory.h"
+#include "scheduler.h"
 #include <math.h>
 
 typedef struct memory_list {

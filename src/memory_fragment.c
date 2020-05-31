@@ -46,7 +46,7 @@ void print_fragment(memory_fragment_t* fragment) {
 }
 
 void log_fragment(memory_fragment_t* fragment) {
-    log_trace("%s b_start: %4d | p_start: %4d | b_length: %4d | p_length:%d | pid:%4d | last_access:%4d|",
+    fprintf(stderr, "%s b_start: %4lld | p_start: %4lld | b_length: %4lld | p_length:%lld | pid:%4lld | last_access:%4lld|\n",
             fragment->type == HOLE_FRAGMENT?"H\t": "P\t",
             fragment->byte_start,
             fragment->page_start,

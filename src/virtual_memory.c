@@ -1,10 +1,16 @@
-//
-// Created by Haswell on 22/05/2020.
-//
+/**
+ * Virtual Memory Module
+ * Created by Haswell on 18/05/2020.
+ */
 
 #include "virtual_memory.h"
-#define UINT_BIT 8
 
+/**
+ * Creates a page table node, which is basically a page table contained in a linklist node.
+ * @param pid
+ * @param page_count
+ * @return
+ */
 page_table_node_t* create_page_table_node(long long int pid, long long int page_count) {
     page_table_node_t* page = (page_table_node_t*)malloc(sizeof(*page));
     assert(page);
@@ -23,6 +29,10 @@ page_table_node_t* create_page_table_node(long long int pid, long long int page_
     return page;
 }
 
+/**
+ * Free a page table
+ * @param page_table
+ */
 void free_page_table_node(page_table_node_t* page_table) {
     assert(page_table);
     free(page_table->page_table_pointer);
@@ -39,19 +49,31 @@ void dlist_free_page_table_node(void* page_table) {
     free(page_table);
 }
 
+/**
+ * Simulates the process of loading a page from disk to memory.
+ * It reduces remaining loading time by 1.
+ * @param memory_manager
+ * @param process
+ */
 void virtual_memory_load_process(virtual_memory_t* memory_manager, process_t* process) {
     Node* current = memory_manager->page_tables->head;
     while (current) {
         page_table_node_t* page_table = (page_table_node_t*)current->data;
         if (page_table->pid == process->pid) {
             page_table->loading_time_left -= 1;
-            log_trace("Process %d is loading. ETA: %d ticks", process->pid, page_table->loading_time_left);
+            fprintf(stderr, "Process %lld is loading. ETA: %lld ticks", process->pid, page_table->loading_time_left);
             return;
         }
         current = current->next;
     }
 }
 
+/**
+ * Create a mapping from a frame number to a virtual address of a process.
+ * @param page_table
+ * @param frame_number
+ * @return
+ */
 long long int map(page_table_node_t * page_table, long long int frame_number) {
     for (long long int i=0; i<page_table->page_count; i++) {
         if (page_table->page_table_pointer[i].validity == 0) {
@@ -64,6 +86,11 @@ long long int map(page_table_node_t * page_table, long long int frame_number) {
     return 0;
 }
 
+/**
+ * Print page table for debugging purpose
+ * @param page_table
+ * @param verbose
+ */
 void print_page_table(page_table_node_t* page_table, bool verbose) {
     printf("pid: %lld %lld/%lld last access: %lld\n", page_table->pid, page_table->valid_page_count, page_table->page_count, page_table->last_access);
     for (long long int i=0; i<page_table->page_count; i++) {
@@ -72,6 +99,12 @@ void print_page_table(page_table_node_t* page_table, bool verbose) {
     printf("\n");
 }
 
+/**
+ * Create a data structure to manage virtual memory.
+ * @param memory_size
+ * @param page_size
+ * @return
+ */
 virtual_memory_t* create_virtual_memory(long long int memory_size, long long int page_size) {
     virtual_memory_t* memory = (virtual_memory_t*)malloc(sizeof(*memory));
     memory->page_size = page_size;
@@ -87,7 +120,12 @@ virtual_memory_t* create_virtual_memory(long long int memory_size, long long int
     return memory;
 }
 
-void free_memory(virtual_memory_t* memory_manager) {
+/**
+ * Free the data structure of virtual memory management
+ * @param memory_manager
+ */
+
+void free_memory(virtual_memory_t *memory_manager) {
     free_dlist(memory_manager->page_tables);
     free(memory_manager->page_frames);
     free(memory_manager->counter);
@@ -141,6 +179,9 @@ long long int allocate_all_free_memory(virtual_memory_t* memory_manager, process
     return newly_allocated;
 }
 
+/**
+ * returns a frame number to evict using least recently used algorithm.
+ */
 long long int LRU(virtual_memory_t* memory_manager, long long int ignore) {
     long long int victim_pid = find_the_oldest_process(memory_manager, ignore);
     long long int frame_number = first_page(memory_manager, victim_pid);
@@ -148,6 +189,12 @@ long long int LRU(virtual_memory_t* memory_manager, long long int ignore) {
     return frame_number;
 }
 
+/**
+ * returns a frame number to evict using least frequently used with aging.
+ * @param memory_manager
+ * @param ignore
+ * @return
+ */
 long long int LFU(virtual_memory_t* memory_manager, long long int ignore) {
     long long int victim_pid = -1;
     long long int min_freq = INT_MAX;
@@ -163,7 +210,12 @@ long long int LFU(virtual_memory_t* memory_manager, long long int ignore) {
     return frame_number;
 }
 
-
+/**
+ * Allocate memory to a process. Evicting pages using LRU if memory is not sufficient.
+ * @param memory_manager
+ * @param process
+ * @param clock
+ */
 void virtual_memory_allocate_memory_LRU(virtual_memory_t* memory_manager, process_t* process, long long int clock) {
     /* convert bytes to page counts */
     long long int page_required = byteToRequiredPage(process->memory, memory_manager->page_size);
@@ -196,9 +248,14 @@ void virtual_memory_allocate_memory_LRU(virtual_memory_t* memory_manager, proces
         printf("\n");
     }
     free(to_print);
-    log_trace("<Memory> %d pages allocated for process %d. Loading requires %d ticks", allocated->valid_page_count, allocated->page_count, process->pid, allocated->loading_time_left);
 }
 
+/**
+ * Allocate memory to a process. Evicting pages using LFU if memory is not sufficient.
+ * @param memory_manager
+ * @param process
+ * @param clock
+ */
 void virtual_memory_allocate_memory_LFU(virtual_memory_t* memory_manager, process_t* process, long long int clock) {
     /* convert bytes to page counts */
     long long int page_required = byteToRequiredPage(process->memory, memory_manager->page_size);
@@ -232,7 +289,6 @@ void virtual_memory_allocate_memory_LFU(virtual_memory_t* memory_manager, proces
             printf("\n");
         }
         free(to_print);
-        log_trace("<Memory> %d pages allocated for process %d. Loading requires %d ticks", allocated->valid_page_count, allocated->page_count, process->pid, allocated->loading_time_left);
     }
 
 }
@@ -275,7 +331,12 @@ long long int first_page(virtual_memory_t* memory_manager, long long int pid) {
     return -1;
 }
 
-
+/**
+ * Destroy the mapping from a frame number into a virtual address of a process
+ * @param memory_manager
+ * @param page_table
+ * @param frame_number
+ */
 void unmap(virtual_memory_t* memory_manager, page_table_node_t* page_table, long long int frame_number) {
     for (long long int i=0; i<page_table->page_count; i++) {
         if (page_table->page_table_pointer[i].validity == 1 && page_table->page_table_pointer[i].frame_number == frame_number) {
@@ -289,13 +350,22 @@ void unmap(virtual_memory_t* memory_manager, page_table_node_t* page_table, long
         }
     }
 }
-
+/**
+ * Evicts the given frame from memory
+ * @param memory_manager
+ * @param frame_number
+ * @return
+ */
 long long int evict_one_page(virtual_memory_t* memory_manager, long long int frame_number) {
     page_table_node_t* page_table = get_page_table(memory_manager, memory_manager->page_frames[frame_number]);
     unmap(memory_manager, page_table, frame_number);
     return frame_number;
 }
 
+/**
+ * Print page frames for debugging purpose
+ * @param memory_manager
+ */
 void print_page_frames(virtual_memory_t* memory_manager) {
     for (long long int i=0; i<memory_manager->total_frame; i++) {
         printf("%llu %lld %d\n", i, memory_manager->page_frames[i], memory_manager->counter[i]);
@@ -303,8 +373,9 @@ void print_page_frames(virtual_memory_t* memory_manager) {
 }
 
 /**
- *
- * @param memory_manager
+ * Simulate the use of  memory
+ * This internally updated last access time of the fragment and the frequency counter of its pages.
+ * @param memoryList
  * @param process
  * @param clock
  */
@@ -314,15 +385,19 @@ void virtual_use_memory(virtual_memory_t* memory_manager, process_t* process, lo
     /*
      * Set the reference bits to 1
      */
-//    print_page_table(page_table, true);
     for (long long int i=0; i<page_table->page_count; i++) {
         page_table->page_table_pointer[i].reference = 1;
     }
-//    print_page_table(page_table, true);
     aging(memory_manager);
 
 }
 
+/**
+ * Print status of a process and its memory usage
+ * @param memory_manager
+ * @param process
+ * @param clock
+ */
 void virtual_process_info(virtual_memory_t* memory_manager, process_t* process, long long int clock) {
     page_table_node_t* page_table = get_page_table(memory_manager, process->pid);
     printf("%lld, RUNNING, id=%lld, remaining-time=%lld, load-time=%lld, mem-usage=%lld%%, ",
@@ -375,12 +450,17 @@ long long int virtual_memory_free_memory(virtual_memory_t* memory_manager, proce
     print_memory(to_print, page_to_free);
     printf("\n");
     free(to_print);
-    log_trace("<Memory> Deallocate %d virtual pages of process %d",
+    fprintf(stderr, "<Memory> Deallocate %lld virtual pages of process %lld\n",
               free_counter,
               page_table->pid);
     return free_counter;
 }
 
+/**
+ * Print pages allocated to a process
+ * @param memory_manager
+ * @param process
+ */
 void virtual_print_addresses(virtual_memory_t* memory_manager, process_t* process) {
     page_table_node_t* page_table = get_page_table(memory_manager, process->pid);
     assert(page_table);
@@ -455,7 +535,12 @@ long long int virtual_page_fault(virtual_memory_t* memory_manager, process_t* pr
 }
 
 
-
+/**
+ * Create an implementation of memory allocator for virtual memory using LRU
+ * @param memory_size
+ * @param page_size
+ * @return
+ */
 memory_allocator_t* create_virtual_memory_allocator_LRU(long long int memory_size, long long int page_size) {
     memory_allocator_t* allocator = malloc(sizeof(*allocator));
     assert(allocator);
@@ -473,6 +558,12 @@ memory_allocator_t* create_virtual_memory_allocator_LRU(long long int memory_siz
     return allocator;
 }
 
+/**
+ * Create an implementation of memory allocator for virtual memory using LFU
+ * @param memory_size
+ * @param page_size
+ * @return
+ */
 memory_allocator_t* create_virtual_memory_allocator_LFU(long long int memory_size, long long int page_size) {
     memory_allocator_t* allocator = malloc(sizeof(*allocator));
     assert(allocator);
@@ -490,7 +581,10 @@ memory_allocator_t* create_virtual_memory_allocator_LFU(long long int memory_siz
     return allocator;
 }
 
-
+/**
+ * Reduces the frequency of pages according to its usage.
+ * @param memory_manager
+ */
 void aging(virtual_memory_t* memory_manager) {
 
     Node* curr = memory_manager->page_tables->head;

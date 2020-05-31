@@ -4,9 +4,9 @@
 
 #ifndef COMP30023_2020_PROJECT_2_PROCESS_H
 #define COMP30023_2020_PROJECT_2_PROCESS_H
-#include "log.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include "stdbool.h"
 
 typedef struct process {
     long long int timeArrived;

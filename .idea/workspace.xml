@@ -29,14 +29,29 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="779d517e-22af-4973-a94d-126a165a96a4" name="Default Changelist" comment="fix: fix memory leak">
-      <change afterPath="$PROJECT_DIR$/report.txt" afterDir="false" />
+    <list default="true" id="779d517e-22af-4973-a94d-126a165a96a4" name="Default Changelist" comment="feat: Add report">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/benchmark-cm.txt" beforeDir="false" afterPath="$PROJECT_DIR$/benchmark-cm.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/benchmark-cs.txt" beforeDir="false" afterPath="$PROJECT_DIR$/benchmark-cs.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scheduler" beforeDir="false" afterPath="$PROJECT_DIR$/scheduler" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/constants.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/constants.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/log.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/log.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/memory_allocator.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory_allocator.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/memory_fragment.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory_fragment.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/memory_fragment.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory_fragment.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/priorityqueue.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/priorityqueue.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/process.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/process.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/process.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/process.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/processes.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/reordering.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/rr_memoryoverlap.txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/scheduler.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/scheduler.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/testcase.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/testcase_generator.py" beforeDir="false" afterPath="$PROJECT_DIR$/testcase_generator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/scheduler.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/scheduler.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/swapping.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/swapping.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/swapping.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/swapping.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/timejumps.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/unlimited.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/unlimited.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/virtual_memory.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/virtual_memory.c" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -123,7 +138,7 @@
       <workItem from="1590668746800" duration="8607000" />
       <workItem from="1590741126685" duration="11425000" />
       <workItem from="1590833011887" duration="1834000" />
-      <workItem from="1590924877763" duration="11096000" />
+      <workItem from="1590924877763" duration="13542000" />
     </task>
     <task id="LOCAL-00001" summary="feat(process.c scheduler.c): Implement argument parsing and load process from file">
       <created>1589733108906</created>
@@ -349,7 +364,14 @@
       <option name="project" value="LOCAL" />
       <updated>1590932462497</updated>
     </task>
-    <option name="localTasksCounter" value="33" />
+    <task id="LOCAL-00033" summary="feat: Add report">
+      <created>1590936240105</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1590936240105</updated>
+    </task>
+    <option name="localTasksCounter" value="34" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -369,7 +391,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="feat: Add proper logging" />
     <MESSAGE value="feat: Add time to log" />
     <MESSAGE value="feat: Use pages in memory list" />
     <MESSAGE value="feat: Integrate scheduler with memory allocator" />
@@ -394,7 +415,8 @@
     <MESSAGE value="fix: fix warnings" />
     <MESSAGE value="fix: fix strncpy" />
     <MESSAGE value="fix: fix memory leak" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: fix memory leak" />
+    <MESSAGE value="feat: Add report" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: Add report" />
   </component>
   <component name="WindowStateProjectService">
     <state x="505" y="269" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1590934537652">
@@ -402,19 +424,19 @@
     </state>
     <state x="871" y="201" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590417489323" />
     <state x="505" y="269" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.2194.1194@0.0.2194.1194" timestamp="1590934537652" />
-    <state x="828" y="399" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1590748339363">
+    <state x="828" y="399" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1590938016282">
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
-    <state x="828" y="399" key="#com.intellij.fileTypes.FileTypeChooser/0.0.2194.1194@0.0.2194.1194" timestamp="1590748339363" />
+    <state x="828" y="399" key="#com.intellij.fileTypes.FileTypeChooser/0.0.2194.1194@0.0.2194.1194" timestamp="1590938016282" />
     <state x="1196" y="251" key="#com.intellij.ide.macro.MacrosDialog" timestamp="1590225893283">
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
     <state x="1196" y="251" key="#com.intellij.ide.macro.MacrosDialog/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590225893283" />
-    <state x="828" y="344" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1590925602430">
+    <state x="828" y="344" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1590936511147">
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
     <state x="828" y="344" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590307378180" />
-    <state x="828" y="344" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.2194.1194@0.0.2194.1194" timestamp="1590925602430" />
+    <state x="828" y="344" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.2194.1194@0.0.2194.1194" timestamp="1590936511147" />
     <state x="981" y="350" key="#xdebugger.XInspectDialog" timestamp="1590926946256">
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
@@ -453,26 +475,26 @@
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
     <state x="836" y="572" key="GrepConsoleTailFileDialog/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590225669268" />
-    <state width="2136" height="782" key="GridCell.Tab.0.bottom" timestamp="1590934539040">
+    <state width="2136" height="223" key="GridCell.Tab.0.bottom" timestamp="1590936502187">
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
     <state width="2151" height="872" key="GridCell.Tab.0.bottom/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590417477258" />
-    <state width="2136" height="782" key="GridCell.Tab.0.bottom/0.0.2194.1194@0.0.2194.1194" timestamp="1590934539040" />
-    <state width="2136" height="782" key="GridCell.Tab.0.center" timestamp="1590934539040">
+    <state width="2136" height="223" key="GridCell.Tab.0.bottom/0.0.2194.1194@0.0.2194.1194" timestamp="1590936502187" />
+    <state width="2136" height="223" key="GridCell.Tab.0.center" timestamp="1590936502187">
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
     <state width="2151" height="872" key="GridCell.Tab.0.center/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590417477258" />
-    <state width="2136" height="782" key="GridCell.Tab.0.center/0.0.2194.1194@0.0.2194.1194" timestamp="1590934539040" />
-    <state width="2136" height="782" key="GridCell.Tab.0.left" timestamp="1590934539040">
+    <state width="2136" height="223" key="GridCell.Tab.0.center/0.0.2194.1194@0.0.2194.1194" timestamp="1590936502187" />
+    <state width="2136" height="223" key="GridCell.Tab.0.left" timestamp="1590936502187">
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
     <state width="2151" height="872" key="GridCell.Tab.0.left/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590417477258" />
-    <state width="2136" height="782" key="GridCell.Tab.0.left/0.0.2194.1194@0.0.2194.1194" timestamp="1590934539040" />
-    <state width="2136" height="782" key="GridCell.Tab.0.right" timestamp="1590934539040">
+    <state width="2136" height="223" key="GridCell.Tab.0.left/0.0.2194.1194@0.0.2194.1194" timestamp="1590936502187" />
+    <state width="2136" height="223" key="GridCell.Tab.0.right" timestamp="1590936502187">
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
     <state width="2151" height="872" key="GridCell.Tab.0.right/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590417477258" />
-    <state width="2136" height="782" key="GridCell.Tab.0.right/0.0.2194.1194@0.0.2194.1194" timestamp="1590934539040" />
+    <state width="2136" height="223" key="GridCell.Tab.0.right/0.0.2194.1194@0.0.2194.1194" timestamp="1590936502187" />
     <state width="2136" height="664" key="GridCell.Tab.1.bottom" timestamp="1590934417718">
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
@@ -507,11 +529,11 @@
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
     <state x="938" y="295" key="VCS.ChangeListViewerDialog/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590235493732" />
-    <state x="690" y="330" key="Vcs.Push.Dialog.v2" timestamp="1590932463802">
+    <state x="690" y="330" key="Vcs.Push.Dialog.v2" timestamp="1590936242391">
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
     <state x="690" y="330" key="Vcs.Push.Dialog.v2/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590416024619" />
-    <state x="690" y="330" key="Vcs.Push.Dialog.v2/0.0.2194.1194@0.0.2194.1194" timestamp="1590932463802" />
+    <state x="690" y="330" key="Vcs.Push.Dialog.v2/0.0.2194.1194@0.0.2194.1194" timestamp="1590936242391" />
     <state x="93" y="93" width="2008" height="1008" key="com.intellij.history.integration.ui.views.FileHistoryDialog" timestamp="1590702957071">
       <screen x="0" y="0" width="2194" height="1194" />
     </state>

@@ -1,9 +1,9 @@
-//
-// Created by Haswell on 18/05/2020.
-//
+/**
+ * Swapping memory module
+ * Created by Haswell on 18/05/2020.
+ */
+
 #include "swapping.h"
-#include "virtual_memory.h"
-#include "scheduler.h"
 
 
 /**
@@ -52,7 +52,7 @@ Node* first_fit(memory_list_t* memoryList, process_t* process) {
     while (current) {
         memory_fragment_t* fragment = (memory_fragment_t*) current->data;
         if (fragment->type == HOLE_FRAGMENT && fragment->page_length >= pages_required) {
-            log_debug("<MEMORY> First fit for pid %d (%d pages) is at %d", process->pid, pages_required, fragment->page_start);
+            fprintf(stderr, "<MEMORY> First fit for pid %lld (%lld pages) is at %lld", process->pid, pages_required, fragment->page_start);
             return current;
         }
         current = current->next;
@@ -111,9 +111,16 @@ Node* allocate(memory_list_t* memoryList, Node* hole, process_t* process) {
     fragment->load_time = LOADING_TIME_PER_PAGE * required_page;
     fragment->type = PROCESS_FRAGMENT;
     fragment->pid = process->pid;
-    log_info("<Scheduler> Memory allocated for process %d (%d bytes)", process->pid, process->memory);
+    fprintf(stderr, "<Scheduler> Memory allocated for process %lld (%lld bytes)\n", process->pid, process->memory);
     return hole;
 }
+
+/**
+ * Return how many ticks the loading time left
+ * @param memoryList
+ * @param process
+ * @return
+ */
 long long int swapping_load_time_left(memory_list_t* memoryList, process_t* process) {
     Node* current = memoryList->list->head;
     memory_fragment_t* fragment = NULL;
@@ -129,6 +136,12 @@ long long int swapping_load_time_left(memory_list_t* memoryList, process_t* proc
     return -1;
 }
 
+/**
+ * Simulates the process of moving page from disk to memory
+ * Reduce the loading time by 1
+ * @param memoryList
+ * @param process
+ */
 void swapping_load_memory(memory_list_t* memoryList, process_t* process) {
     Node* current = memoryList->list->head;
     memory_fragment_t* fragment = NULL;
@@ -137,13 +150,17 @@ void swapping_load_memory(memory_list_t* memoryList, process_t* process) {
         if (fragment->type == PROCESS_FRAGMENT) {
             if (fragment->pid == process->pid && fragment->load_time > 0) {
                 fragment->load_time -= 1;
-                log_trace("<Scheduler> Loading pages for process %d ETA: %d ticks", process->pid, fragment->load_time);
+                fprintf(stderr, "<Scheduler> Loading pages for process %lld ETA: %lld ticks", process->pid, fragment->load_time);
             }
         }
         current = current->next;
     }
 }
 
+/**
+ * Dump the memory structure to stderr
+ * @param memoryList
+ */
 void log_memory_list(memory_list_t* memoryList) {
     Node* current = memoryList->list->head;
     while (current) {
@@ -152,6 +169,10 @@ void log_memory_list(memory_list_t* memoryList) {
     }
 }
 
+/**
+ * Free a block of allocated memory
+ * @param nodeToFree
+ */
 void deallocate_memory_fragment(Node* nodeToFree) {
     memory_fragment_t* fragmentToFree = (memory_fragment_t*) nodeToFree->data;
     fragmentToFree->type = HOLE_FRAGMENT;
@@ -296,7 +317,7 @@ Node* swapping_allocate_memory(memory_list_t* memoryList, process_t* process, lo
      * until a fragment is found.
      */
     while (!freeSpace){
-        log_debug("<MEMORY> Insufficient memory for process %d\t requiring %d bytes", process->pid, process->memory);
+        fprintf(stderr, "<MEMORY> Insufficient memory for process %lld\t requiring %lld bytes\n", process->pid, process->memory);
         Node* toEvict = find_least_recently_used(memoryList);
         if (toEvict) {
             memory_fragment_t* fragment = (memory_fragment_t*)toEvict->data;
@@ -334,7 +355,7 @@ memory_fragment_t* get_fragment(memory_list_t* memoryList, process_t* process) {
 }
 
 /**
- * Use memory
+ * Simulate the use of  memory
  * This internally updated last access time of the fragment.
  * @param memoryList
  * @param process
@@ -346,6 +367,12 @@ void swapping_use_memory(memory_list_t* memoryList, process_t* process, long lon
     fragment->last_access = clock;
 }
 
+/**
+ * Print status of a process and its memory usage
+ * @param memoryList
+ * @param process
+ * @param clock
+ */
 void swapping_process_info(memory_list_t* memoryList, process_t* process, long long int clock) {
     memory_fragment_t* fragment = get_fragment(memoryList, process);
     assert(fragment);
@@ -359,6 +386,11 @@ void swapping_process_info(memory_list_t* memoryList, process_t* process, long l
     printf("\n");
 }
 
+/**
+ * Print addresses of evicted pages in the required format
+ * @param memoryList
+ * @param process
+ */
 void swapping_print_addresses(memory_list_t* memoryList, process_t* process) {
     assert(memoryList && process);
     memory_fragment_t* fragment = get_fragment(memoryList, process);
@@ -371,6 +403,12 @@ void swapping_print_addresses(memory_list_t* memoryList, process_t* process) {
     free(addr_to_print);
 }
 
+/**
+ * Return memory usage in percentage.
+ * @param memoryList
+ * @param process
+ * @return
+ */
 long long int swapping_memory_usage(memory_list_t* memoryList, process_t* process) {
     assert(memoryList && process);
     long long int total = 0;
@@ -387,6 +425,12 @@ long long int swapping_memory_usage(memory_list_t* memoryList, process_t* proces
     return ceil((double)in_use * 100 /(double)total);
 }
 
+/**
+ * Free all memory allocated to a process
+ * @param memoryList
+ * @param process
+ * @param clock
+ */
 void swapping_free_memory(memory_list_t* memoryList, process_t* process, long long int clock) {
     assert(memoryList && process);
     Node* current = memoryList->list->head;
@@ -410,6 +454,12 @@ void swapping_free_memory(memory_list_t* memoryList, process_t* process, long lo
     }
 }
 
+/**
+ * Returns if a process has been allocated all memory it requires.
+ * @param memoryList
+ * @param process
+ * @return
+ */
 long long int swapping_require_allocation(memory_list_t* memoryList, process_t* process) {
     assert(memoryList && process);
     Node* current = memoryList->list->head;
@@ -423,11 +473,24 @@ long long int swapping_require_allocation(memory_list_t* memoryList, process_t* 
     return -1;
 }
 
+/**
+ * Returns how many page fault will occur during execution.
+ * Since swapping won't cause page fault, always returns 0
+ * @param memoryList
+ * @param process
+ * @return
+ */
 long long int swapping_page_fault(memory_list_t* memoryList, process_t* process) {
     assert(memoryList && process);
     return 0;
 }
 
+/**
+ * Create an implementation of memory allocator for swapping
+ * @param memory_size
+ * @param page_size
+ * @return
+ */
 memory_allocator_t* create_swapping_allocator(long long int memory_size, long long int page_size) {
     memory_allocator_t* allocator = malloc(sizeof(*allocator));
     assert(allocator);

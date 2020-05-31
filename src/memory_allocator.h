@@ -1,6 +1,7 @@
-//
-// Created by Haswell on 20/05/2020.
-//
+/**
+ * memory allocator defines an interface(sort of) for memory management.
+ * Created by Haswell on 20/05/2020
+ */
 
 #ifndef SCHEDULER_MEMORY_ALLOCATOR_H
 #define SCHEDULER_MEMORY_ALLOCATOR_H

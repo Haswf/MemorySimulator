@@ -16,7 +16,6 @@
 #include "heap.h"
 #include "swapping.h"
 #include "memory_fragment.h"
-#include "log.h"
 #include "memory_allocator.h"
 #include "unlimited.h"
 #include "deque.h"

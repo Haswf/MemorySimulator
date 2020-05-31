@@ -4,8 +4,6 @@
 
 #include "scheduler.h"
 
-
-
 void inspectArguments(char* fileName, long long int schedulingAlgorithm, long long int memoryAllocation, long long int memorySize, long long int quantum) {
     printf("Filename: %s\n", fileName);
     printf("Scheduling Algorithm: %lld\n", schedulingAlgorithm);
@@ -44,10 +42,10 @@ void execute(process_t* process, long long int clock) {
     static process_t* last = NULL;
     process->remaining_time--;
     if (process!=last) {
-        log_info("<Scheduler> process %d start executing, ETA: %d ticks", process->pid, process->remaining_time);
+        fprintf(stderr, "<Scheduler> process %lld start executing, ETA: %lld ticks", process->pid, process->remaining_time);
         last = process;
     }
-    log_trace("<Scheduler> process %d is running, ETA: %d ticks", process->pid, process->remaining_time);
+    fprintf(stderr, "<Scheduler> process %lld is running, ETA: %lld ticks", process->pid, process->remaining_time);
 }
 
 long long int load_process(Deque* pending, Deque* suspended, long long int clock) {
@@ -62,7 +60,7 @@ long long int load_process(Deque* pending, Deque* suspended, long long int clock
 
     while (heap_size(toAdd) > 0) {
         process_t next_process = heap_pop_min(toAdd);
-        log_info("<Scheduler> Process %d inserted to suspended queue", next_process.pid);
+        fprintf(stderr, "<Scheduler> Process %lld inserted to suspended queue", next_process.pid);
         process_t* next = create_process(next_process.timeArrived, next_process.pid, next_process.memory, next_process.job_time);
         deque_insert(suspended, next);
         count++;
@@ -263,7 +261,7 @@ void load_new_process(heap_t* suspended, Deque* pending, long long int clock) {
         assert(process->timeArrived == clock);
         heap_insert(toAdd, *process);
         free_process(process);
-        log_info("Process %d added to suspended", process->pid);
+        fprintf(stderr, "Process %lld added to suspended", process->pid);
         log_process(process);
     }
     while (heap_size(toAdd) > 0) {
@@ -317,8 +315,6 @@ int main(int argc, char *argv[]) {
                 abort();
         }
     }
-
-    log_set_level(LOG_LEVEL);
 
 //    inspectArguments(file_name, scheduling_algorithm, memory_allocation, memory_size, quantum);
 
@@ -394,7 +390,7 @@ void print_memory(long long int* addresses, long long int count) {
 }
 
 void finish_process(process_t* process, Deque* finish, long long int clock, long long int proc_remaining) {
-    log_info("<Scheduler> Process %d finished",process->pid);
+    fprintf(stderr, "<Scheduler> Process %lld finished\n",process->pid);
     process->finish_time = clock;
     output_finish(clock, process, proc_remaining);
     deque_insert(finish, process);

@@ -6,7 +6,6 @@
 #define COMP30023_2020_PROJECT_2_MEMORY_FRAGMENT_H
 
 #include "process.h"
-#include "log.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include "constants.h"

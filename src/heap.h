@@ -24,5 +24,5 @@ void heap_insert(heap_t *h, data key);
 void heap_print(heap_t *h, void (*print)(void *));
 data heap_pop_min(heap_t *h);
 int heap_size(heap_t* heap);
-
+void free_heap(heap_t *h);
 #endif //HEAP_H

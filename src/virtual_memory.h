@@ -62,7 +62,7 @@ long long int virtual_memory_usage(virtual_memory_t* memory_manager);
 void virtual_print_addresses(virtual_memory_t* memory_manager, process_t* process);
 void aging(virtual_memory_t* memory_manager);
 
-
+void free_memory(virtual_memory_t* memory_manager);
 /**
  * Return the frame number of the first frame of a process in memory
  * @param memory_manager

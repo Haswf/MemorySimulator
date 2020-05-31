@@ -87,6 +87,13 @@ virtual_memory_t* create_virtual_memory(long long int memory_size, long long int
     return memory;
 }
 
+void free_memory(virtual_memory_t* memory_manager) {
+    free_dlist(memory_manager->page_tables);
+    free(memory_manager->page_frames);
+    free(memory_manager->counter);
+    free(memory_manager);
+}
+
 /**
  * returns page table of a process.
  * NULL if not found in memory.
@@ -208,23 +215,26 @@ void virtual_memory_allocate_memory_LFU(virtual_memory_t* memory_manager, proces
 
     /* The number of pages must be evicted to let the process run */
     long long int evict_page_count = allocation_target - allocated->valid_page_count;
-    long long* to_print = malloc(sizeof(*to_print) * evict_page_count);
-    long long int index = 0;
-
-    /* Evict pages if memory allocated isn't enough for execution */
-    while (allocated->valid_page_count < allocation_target){
-        long long int victim = LFU(memory_manager, allocated->pid);
-
-        to_print[index++] = evict_one_page(memory_manager, victim);
-        allocate_all_free_memory(memory_manager, process);
-    }
     if (evict_page_count > 0) {
-        printf("%lld, EVICTED, mem-addresses=", clock);
-        print_memory(to_print, evict_page_count);
-        printf("\n");
+        long long* to_print = malloc(sizeof(*to_print) * evict_page_count);
+        long long int index = 0;
+
+        /* Evict pages if memory allocated isn't enough for execution */
+        while (allocated->valid_page_count < allocation_target){
+            long long int victim = LFU(memory_manager, allocated->pid);
+
+            to_print[index++] = evict_one_page(memory_manager, victim);
+            allocate_all_free_memory(memory_manager, process);
+        }
+        if (evict_page_count > 0) {
+            printf("%lld, EVICTED, mem-addresses=", clock);
+            print_memory(to_print, evict_page_count);
+            printf("\n");
+        }
+        free(to_print);
+        log_trace("<Memory> %d pages allocated for process %d. Loading requires %d ticks", allocated->valid_page_count, allocated->page_count, process->pid, allocated->loading_time_left);
     }
-    free(to_print);
-    log_trace("<Memory> %d pages allocated for process %d. Loading requires %d ticks", allocated->valid_page_count, allocated->page_count, process->pid, allocated->loading_time_left);
+
 }
 /*
  * Returns the pid of the least recently executed process in memory

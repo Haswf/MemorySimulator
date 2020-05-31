@@ -102,3 +102,8 @@ void heap_print(heap_t *h, void (*print)(void *)){
         print(&h->arr[i]);
     }
 }
+
+void free_heap(heap_t *h) {
+    free(h->arr);
+    free(h);
+}

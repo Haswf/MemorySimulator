@@ -67,14 +67,12 @@ long long int load_process(Deque* pending, Deque* suspended, long long int clock
         deque_insert(suspended, next);
         count++;
     }
-//    printf("---------loading---------------\n");
-//    print_deque(suspended);
+    free_heap(toAdd);
     return count;
 }
 
 void tick(long long int* clock) {
     *clock = *clock+1;
-//    log_info("-------- t=%d --------", *clock);
 }
 
 long long int init(Deque* processes, Deque* pending, Deque* suspended) {
@@ -123,6 +121,8 @@ void firstComeFirstServe(memory_allocator_t* allocator, Deque* processes, Deque*
         allocator->free(allocator->structure, process, *clock);
         finish_process(process, finish, *clock, deque_size(suspended));
     }
+    free_deque(pending);
+    free_deque(pending);
 }
 
 void roundRobin(memory_allocator_t* allocator, Deque* processes, Deque* finish, long long int* clock, long long int quantum) {
@@ -167,7 +167,10 @@ void roundRobin(memory_allocator_t* allocator, Deque* processes, Deque* finish, 
         else {
             tick(clock);
         }
+
     }
+    free_deque(pending);
+    free_deque(suspended);
 }
 
 int compare_remaining_time(void * a, void * b) {
@@ -338,6 +341,19 @@ int main(int argc, char *argv[]) {
         shortestRemainingTimeFirst(allocator, processes, finish, &clock);
     }
     analysis(finish, clock);
+    free_deque(processes);
+    free_deque(finish);
+    free(file_name);
+
+    if (memory_allocation == UNLIMITED) {
+
+    } else if (memory_allocation == SWAPPING) {
+        free_memory_list(((memory_list_t*) allocator->structure));
+    } else {
+        free_memory(((virtual_memory_t *) allocator->structure));
+    }
+    free(allocator);
+
     return 0;
 }
 

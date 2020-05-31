@@ -65,9 +65,9 @@ long long int map(page_table_node_t * page_table, long long int frame_number) {
 }
 
 void print_page_table(page_table_node_t* page_table, bool verbose) {
-    printf("pid: %d %d/%d last access: %d\n", page_table->pid, page_table->valid_page_count, page_table->page_count, page_table->last_access);
+    printf("pid: %lld %lld/%lld last access: %lld\n", page_table->pid, page_table->valid_page_count, page_table->page_count, page_table->last_access);
     for (long long int i=0; i<page_table->page_count; i++) {
-        printf("%d: [%d] %d %c\t", i, page_table->page_table_pointer[i].validity, page_table->page_table_pointer[i].frame_number, page_table->page_table_pointer[i].reference==1?'R':' ');
+        printf("%llu: [%lld] %lld %c\t", i, page_table->page_table_pointer[i].validity, page_table->page_table_pointer[i].frame_number, page_table->page_table_pointer[i].reference==1?'R':' ');
     }
     printf("\n");
 }
@@ -78,8 +78,8 @@ virtual_memory_t* create_virtual_memory(long long int memory_size, long long int
     memory->total_frame = memory_size/page_size;
     memory->free_frame = memory_size/page_size;
     memory->page_tables = new_dlist(dlist_free_page_table_node, (void (*)(void *)) print_page_table);
-    memory->page_frames = (int*)malloc(sizeof(memory->page_frames) * memory->total_frame);
-    memory->counter = (int*)malloc(sizeof(memory->counter) * memory->total_frame);
+    memory->page_frames = malloc(sizeof(memory->page_frames) * memory->total_frame);
+    memory->counter = malloc(sizeof(memory->counter) * memory->total_frame);
     for (long long int i=0; i<memory->total_frame; i++) {
         memory->page_frames[i] = NOT_OCCUPIED;
         memory->counter[i] = 0;
@@ -169,7 +169,7 @@ void virtual_memory_allocate_memory_LRU(virtual_memory_t* memory_manager, proces
         allocated = create_page_table_node(process->pid, page_required);
         dlist_add_end(memory_manager->page_tables, allocated);
     }
-    allocate_all_free_memory(memory_manager, process);;
+    allocate_all_free_memory(memory_manager, process);
 
     /* The number of pages must be evicted to let the process run */
     long long int evict_page_count = allocation_target - allocated->valid_page_count;
@@ -184,7 +184,7 @@ void virtual_memory_allocate_memory_LRU(virtual_memory_t* memory_manager, proces
         allocate_all_free_memory(memory_manager, process);
     }
     if (evict_page_count > 0) {
-        printf("%d, EVICTED, mem-addresses=", clock);
+        printf("%lld, EVICTED, mem-addresses=", clock);
         print_memory(to_print, evict_page_count);
         printf("\n");
     }
@@ -204,7 +204,7 @@ void virtual_memory_allocate_memory_LFU(virtual_memory_t* memory_manager, proces
         allocated = create_page_table_node(process->pid, page_required);
         dlist_add_end(memory_manager->page_tables, allocated);
     }
-    allocate_all_free_memory(memory_manager, process);;
+    allocate_all_free_memory(memory_manager, process);
 
     /* The number of pages must be evicted to let the process run */
     long long int evict_page_count = allocation_target - allocated->valid_page_count;
@@ -219,7 +219,7 @@ void virtual_memory_allocate_memory_LFU(virtual_memory_t* memory_manager, proces
         allocate_all_free_memory(memory_manager, process);
     }
     if (evict_page_count > 0) {
-        printf("%d, EVICTED, mem-addresses=", clock);
+        printf("%lld, EVICTED, mem-addresses=", clock);
         print_memory(to_print, evict_page_count);
         printf("\n");
     }
@@ -265,20 +265,6 @@ long long int first_page(virtual_memory_t* memory_manager, long long int pid) {
     return -1;
 }
 
-long long int least_frequent_used_with_aging(virtual_memory_t* memory_manager) {
-    unsigned int min = 256;
-    long long int frame_number = -1;
-    for (long long int i=0; i<memory_manager->total_frame; i++) {
-        if (memory_manager->counter[i] < min) {
-            min = memory_manager->counter[i];
-            frame_number = i;
-        }
-    }
-    assert(frame_number >= 0);
-
-    return frame_number;
-
-}
 
 void unmap(virtual_memory_t* memory_manager, page_table_node_t* page_table, long long int frame_number) {
     for (long long int i=0; i<page_table->page_count; i++) {
@@ -302,7 +288,7 @@ long long int evict_one_page(virtual_memory_t* memory_manager, long long int fra
 
 void print_page_frames(virtual_memory_t* memory_manager) {
     for (long long int i=0; i<memory_manager->total_frame; i++) {
-        printf("%d %d %d\n", i, memory_manager->page_frames[i], memory_manager->counter[i]);
+        printf("%llu %lld %d\n", i, memory_manager->page_frames[i], memory_manager->counter[i]);
     }
 }
 
@@ -329,7 +315,7 @@ void virtual_use_memory(virtual_memory_t* memory_manager, process_t* process, lo
 
 void virtual_process_info(virtual_memory_t* memory_manager, process_t* process, long long int clock) {
     page_table_node_t* page_table = get_page_table(memory_manager, process->pid);
-    printf("%d, RUNNING, id=%d, remaining-time=%d, load-time=%d, mem-usage=%d%%, ",
+    printf("%lld, RUNNING, id=%lld, remaining-time=%lld, load-time=%lld, mem-usage=%lld%%, ",
            clock,
            process->pid,
            process->remaining_time,
@@ -375,7 +361,7 @@ long long int virtual_memory_free_memory(virtual_memory_t* memory_manager, proce
             free_counter++;
         }
     }
-    printf("%d, EVICTED, mem-addresses=", clock);
+    printf("%lld, EVICTED, mem-addresses=", clock);
     print_memory(to_print, page_to_free);
     printf("\n");
     free(to_print);
@@ -463,10 +449,10 @@ long long int virtual_page_fault(virtual_memory_t* memory_manager, process_t* pr
 memory_allocator_t* create_virtual_memory_allocator_LRU(long long int memory_size, long long int page_size) {
     memory_allocator_t* allocator = malloc(sizeof(*allocator));
     assert(allocator);
-    allocator->malloc = (void *(*)(void *, process_t *, int)) virtual_memory_allocate_memory_LRU;
-    allocator->use = (void (*)(void *, process_t *, int)) virtual_use_memory;
-    allocator->info = (void (*)(void *, process_t *, int)) virtual_process_info;
-    allocator->free = (void (*)(void *, process_t *, int)) virtual_memory_free_memory;
+    allocator->malloc = (void *(*)(void *, process_t *, long long int)) virtual_memory_allocate_memory_LRU;
+    allocator->use = (void (*)(void *, process_t *, long long int)) virtual_use_memory;
+    allocator->info = (void (*)(void *, process_t *, long long int)) virtual_process_info;
+    allocator->free = (void (*)(void *, process_t *, long long int)) virtual_memory_free_memory;
     allocator->load = (void (*)(void *, process_t *)) virtual_memory_load_process;
     allocator->load_time_left = (long long int (*)(void *, process_t *)) virtual_load_time_left;
     allocator->require_allocation = (long long int (*)(void *, process_t *)) (long long int (*)(void *,
@@ -480,10 +466,10 @@ memory_allocator_t* create_virtual_memory_allocator_LRU(long long int memory_siz
 memory_allocator_t* create_virtual_memory_allocator_LFU(long long int memory_size, long long int page_size) {
     memory_allocator_t* allocator = malloc(sizeof(*allocator));
     assert(allocator);
-    allocator->malloc = (void *(*)(void *, process_t *, int)) virtual_memory_allocate_memory_LFU;
-    allocator->use = (void (*)(void *, process_t *, int)) virtual_use_memory;
-    allocator->info = (void (*)(void *, process_t *, int)) virtual_process_info;
-    allocator->free = (void (*)(void *, process_t *, int)) virtual_memory_free_memory;
+    allocator->malloc = (void *(*)(void *, process_t *, long long int)) virtual_memory_allocate_memory_LFU;
+    allocator->use = (void (*)(void *, process_t *, long long int)) virtual_use_memory;
+    allocator->info = (void (*)(void *, process_t *, long long int)) virtual_process_info;
+    allocator->free = (void (*)(void *, process_t *, long long int)) virtual_memory_free_memory;
     allocator->load = (void (*)(void *, process_t *)) virtual_memory_load_process;
     allocator->load_time_left = (long long int (*)(void *, process_t *)) virtual_load_time_left;
     allocator->require_allocation = (long long int (*)(void *, process_t *)) (long long int (*)(void *,
@@ -498,13 +484,9 @@ memory_allocator_t* create_virtual_memory_allocator_LFU(long long int memory_siz
 void aging(virtual_memory_t* memory_manager) {
 
     Node* curr = memory_manager->page_tables->head;
-//    printf("--------before-----------\n");
-//    print_page_frames(memory_manager);
-//    printf("--------after--------------\n");
     while (curr) {
         page_table_node_t* page_table = (page_table_node_t*)curr->data;
         assert(page_table);
-        char print[9];
         for (long long int i=0; i<page_table->page_count; i++) {
             if (page_table->page_table_pointer[i].validity) {
                 long long int frame_number = page_table->page_table_pointer[i].frame_number;
@@ -519,6 +501,4 @@ void aging(virtual_memory_t* memory_manager) {
         }
         curr = curr->next;
     }
-//    print_page_frames(memory_manager);
-//    printf("-------------------------\n");
 }

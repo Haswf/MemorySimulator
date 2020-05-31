@@ -4,7 +4,7 @@
 
 #include "unlimited.h"
 
-void* unlimited_allocate_memory(void* structure, process_t* process) {
+void* unlimited_allocate_memory(void* structure, process_t* process,long long int clock) {
     return (void*)1;
 };
 

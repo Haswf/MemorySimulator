@@ -102,7 +102,7 @@ void firstComeFirstServe(memory_allocator_t* allocator, Deque* processes, Deque*
         process_t* process = deque_pop(suspended);
 
         if (allocator->require_allocation(allocator->structure, process)) {
-            void* allocation = allocator->malloc(allocator->structure, process, *clock);
+            allocator->malloc(allocator->structure, process, *clock);
         }
         allocator->info(allocator->structure, process, *clock);
 
@@ -267,10 +267,8 @@ int main(int argc, char *argv[]) {
     long long int memory_allocation = -1;
     long long int memory_size = -1;
     long long int quantum = 10;
-    long long int total = 0;
 
-
-    char opt ;
+    char opt;
     while ((opt  = getopt (argc, argv, ":f:a:m:s:q:")) != -1) {
         switch (opt) {
             case 'f':
@@ -328,7 +326,7 @@ int main(int argc, char *argv[]) {
 
     Deque *processes = new_deque((void (*)(void *)) printProcess);
     Deque *finish = new_deque((void (*)(void *)) printProcess);
-    total = readProcessesFromFile(file_name, processes);
+    readProcessesFromFile(file_name, processes);
     long long int clock = 0;
 
     if (scheduling_algorithm == FIRST_COME_FIRST_SERVED) {
@@ -340,7 +338,7 @@ int main(int argc, char *argv[]) {
     }
     analysis(finish, clock);
     return 0;
-};
+}
 
 int cmp_long_long_int (const void * a, const void * b) {
     long long int val1 = *(long long int*)a;
@@ -392,7 +390,7 @@ void analysis(Deque* finished, long long int clock) {
     while (deque_size(finished) > 0) {
         process_t* process = deque_pop(finished);
         long long int turn_around = process->finish_time - process->timeArrived;
-        double overhead = (double)turn_around/process->job_time;
+        double overhead = (double)turn_around/(double)process->job_time;
         total_overhead += overhead;
         if (overhead > max_overhead) {
             max_overhead = overhead;

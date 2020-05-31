@@ -16,6 +16,7 @@
 #include <stdint.h>
 #include "ctype.h"
 #include "constants.h"
+#include "scheduler.h"
 #define NOT_OCCUPIED -1
 #define MIN_PAGE_REQUIRED_TO_RUN 4
 
@@ -24,7 +25,7 @@ typedef struct virtual_memory {
     long long int free_frame;
     long long int total_frame;
     /* This array records which process each page has been mapped into */
-    int* page_frames;
+    long long int* page_frames;
     /* This array records how many time each page has been referenced */
     unsigned int* counter;
     Dlist* page_tables;

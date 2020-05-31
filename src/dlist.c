@@ -202,6 +202,7 @@ Node* dlist_insert_after(Dlist *ddl, Node* after, Data newData) {
         }
         current = current -> next;
     }
+    return NULL;
 }
 
 Node* dlist_remove(Dlist *ddl, Node* toRemove) {

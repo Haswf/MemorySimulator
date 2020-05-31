@@ -5,7 +5,7 @@
 #include "process.h"
 
 void output_finish(long long int clock, process_t* process, long long int proc_remaining) {
-    printf("%d, FINISHED, id=%d, proc-remaining=%d\n", clock, process->pid, proc_remaining);
+    printf("%lld, FINISHED, id=%lld, proc-remaining=%lld\n", clock, process->pid, proc_remaining);
 }
 
 process_t* create_process(long long int timeArrived, long long int pid, long long int memory, long long int job_time) {
@@ -22,7 +22,7 @@ process_t* create_process(long long int timeArrived, long long int pid, long lon
 };
 
 void printProcess(process_t* process) {
-    fprintf(stderr, "arrived: %d\tpid: %d\tmemory: %d\tjobTime: %d\n", process->timeArrived, process->pid, process->memory, process->remaining_time);
+    fprintf(stderr, "arrived: %lld\tpid: %lld\tmemory: %lld\tjobTime: %lld\n", process->timeArrived, process->pid, process->memory, process->remaining_time);
 }
 
 void log_process(process_t* process) {

@@ -262,17 +262,18 @@ void load_new_process(heap_t* suspended, Deque* pending, long long int clock) {
 }
 
 int main(int argc, char *argv[]) {
-    char file_name[100];
+    char* file_name = NULL;
     long long int scheduling_algorithm = -1;
     long long int memory_allocation = -1;
     long long int memory_size = -1;
     long long int quantum = 10;
 
     char opt;
-    while ((opt  = getopt (argc, argv, ":f:a:m:s:q:")) != -1) {
+    while ((opt = getopt (argc, argv, ":f:a:m:s:q:")) != -1) {
         switch (opt) {
             case 'f':
-                strncpy(file_name, optarg, strlen(optarg));
+                file_name = malloc(sizeof(file_name) * (strlen(optarg)+1));
+                strcpy(file_name, optarg);
                 file_name[strlen(optarg)] = '\0';
                 break;
             case 'a':

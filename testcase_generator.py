@@ -15,11 +15,11 @@ processes = []
 
 def testcase_generator():	
 	with open("testcase.txt", 'w') as f:
-		for i in range(0, random.randrange(1, 100)):
+		for i in range(0, random.randrange(1, 50)):
 			this_pid = random.randrange(MIN_PID, MAX_PID)	
 			while this_pid in pids:
 				this_pid = random.randrange(MIN_PID, MAX_PID)
-				pids.append(this_pid)
+			pids.append(this_pid)
 			processes.append((random.randrange(MIN_ARRIVAL_TIME, MAX_ARRIVAL_TIME), this_pid, random.randrange(1, MAX_MEMORY), random.randrange(MIN_JOB_TIME, MAX_JOB_TIME)))
 		f.writelines(['{} {} {} {}\n'.format(process[0], process[1], process[2] ,process[3]) for process in sorted(processes, key=lambda x:x[0])])
 

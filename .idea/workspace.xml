@@ -29,15 +29,14 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="779d517e-22af-4973-a94d-126a165a96a4" name="Default Changelist" comment="fix: fix strncpy">
+    <list default="true" id="779d517e-22af-4973-a94d-126a165a96a4" name="Default Changelist" comment="fix: fix memory leak">
+      <change afterPath="$PROJECT_DIR$/report.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scheduler" beforeDir="false" afterPath="$PROJECT_DIR$/scheduler" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/heap.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/heap.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/heap.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/heap.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/benchmark-cm.txt" beforeDir="false" afterPath="$PROJECT_DIR$/benchmark-cm.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/benchmark-cs.txt" beforeDir="false" afterPath="$PROJECT_DIR$/benchmark-cs.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/scheduler.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/scheduler.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/virtual_memory.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/virtual_memory.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/virtual_memory.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/virtual_memory.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/testcase.txt" beforeDir="false" afterPath="$PROJECT_DIR$/testcase.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/testcase.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/testcase_generator.py" beforeDir="false" afterPath="$PROJECT_DIR$/testcase_generator.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -84,7 +83,7 @@
     </key>
   </component>
   <component name="RunManager">
-    <configuration name="scheduler" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="./scheduler -f testcase.txt -a rr -s 100 -m ff -q 10" REDIRECT_INPUT="false" WORKING_DIR="file://.." PASS_PARENT_ENVS_2="true" PROJECT_NAME="scheduler" TARGET_NAME="scheduler" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="scheduler" RUN_TARGET_NAME="scheduler">
+    <configuration name="scheduler" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="./scheduler -f benchmark-cs.txt -a cs -s 100 -m v" REDIRECT_INPUT="false" WORKING_DIR="file://.." PASS_PARENT_ENVS_2="true" PROJECT_NAME="scheduler" TARGET_NAME="scheduler" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="scheduler" RUN_TARGET_NAME="scheduler">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -124,7 +123,7 @@
       <workItem from="1590668746800" duration="8607000" />
       <workItem from="1590741126685" duration="11425000" />
       <workItem from="1590833011887" duration="1834000" />
-      <workItem from="1590924877763" duration="7385000" />
+      <workItem from="1590924877763" duration="11096000" />
     </task>
     <task id="LOCAL-00001" summary="feat(process.c scheduler.c): Implement argument parsing and load process from file">
       <created>1589733108906</created>
@@ -343,7 +342,14 @@
       <option name="project" value="LOCAL" />
       <updated>1590931239907</updated>
     </task>
-    <option name="localTasksCounter" value="32" />
+    <task id="LOCAL-00032" summary="fix: fix memory leak">
+      <created>1590932462497</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1590932462497</updated>
+    </task>
+    <option name="localTasksCounter" value="33" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -363,7 +369,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="feat: Added swapping for FCFS" />
     <MESSAGE value="feat: Add proper logging" />
     <MESSAGE value="feat: Add time to log" />
     <MESSAGE value="feat: Use pages in memory list" />
@@ -388,14 +393,15 @@
     <MESSAGE value="fix: Replace int with long long int" />
     <MESSAGE value="fix: fix warnings" />
     <MESSAGE value="fix: fix strncpy" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: fix strncpy" />
+    <MESSAGE value="fix: fix memory leak" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: fix memory leak" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="505" y="269" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1590932273221">
+    <state x="505" y="269" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1590934537652">
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
     <state x="871" y="201" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590417489323" />
-    <state x="505" y="269" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.2194.1194@0.0.2194.1194" timestamp="1590932273221" />
+    <state x="505" y="269" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.2194.1194@0.0.2194.1194" timestamp="1590934537652" />
     <state x="828" y="399" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1590748339363">
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
@@ -447,46 +453,46 @@
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
     <state x="836" y="572" key="GrepConsoleTailFileDialog/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590225669268" />
-    <state width="1025" height="284" key="GridCell.Tab.0.bottom" timestamp="1590932225063">
+    <state width="2136" height="782" key="GridCell.Tab.0.bottom" timestamp="1590934539040">
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
     <state width="2151" height="872" key="GridCell.Tab.0.bottom/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590417477258" />
-    <state width="1025" height="284" key="GridCell.Tab.0.bottom/0.0.2194.1194@0.0.2194.1194" timestamp="1590932225063" />
-    <state width="1025" height="284" key="GridCell.Tab.0.center" timestamp="1590932225063">
+    <state width="2136" height="782" key="GridCell.Tab.0.bottom/0.0.2194.1194@0.0.2194.1194" timestamp="1590934539040" />
+    <state width="2136" height="782" key="GridCell.Tab.0.center" timestamp="1590934539040">
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
     <state width="2151" height="872" key="GridCell.Tab.0.center/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590417477258" />
-    <state width="1025" height="284" key="GridCell.Tab.0.center/0.0.2194.1194@0.0.2194.1194" timestamp="1590932225063" />
-    <state width="1025" height="284" key="GridCell.Tab.0.left" timestamp="1590932225062">
+    <state width="2136" height="782" key="GridCell.Tab.0.center/0.0.2194.1194@0.0.2194.1194" timestamp="1590934539040" />
+    <state width="2136" height="782" key="GridCell.Tab.0.left" timestamp="1590934539040">
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
     <state width="2151" height="872" key="GridCell.Tab.0.left/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590417477258" />
-    <state width="1025" height="284" key="GridCell.Tab.0.left/0.0.2194.1194@0.0.2194.1194" timestamp="1590932225062" />
-    <state width="1025" height="284" key="GridCell.Tab.0.right" timestamp="1590932225063">
+    <state width="2136" height="782" key="GridCell.Tab.0.left/0.0.2194.1194@0.0.2194.1194" timestamp="1590934539040" />
+    <state width="2136" height="782" key="GridCell.Tab.0.right" timestamp="1590934539040">
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
     <state width="2151" height="872" key="GridCell.Tab.0.right/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590417477258" />
-    <state width="1025" height="284" key="GridCell.Tab.0.right/0.0.2194.1194@0.0.2194.1194" timestamp="1590932225063" />
-    <state width="1025" height="284" key="GridCell.Tab.1.bottom" timestamp="1590932225062">
+    <state width="2136" height="782" key="GridCell.Tab.0.right/0.0.2194.1194@0.0.2194.1194" timestamp="1590934539040" />
+    <state width="2136" height="664" key="GridCell.Tab.1.bottom" timestamp="1590934417718">
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
     <state width="2151" height="888" key="GridCell.Tab.1.bottom/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590416987909" />
-    <state width="1025" height="284" key="GridCell.Tab.1.bottom/0.0.2194.1194@0.0.2194.1194" timestamp="1590932225062" />
-    <state width="1025" height="284" key="GridCell.Tab.1.center" timestamp="1590932225062">
+    <state width="2136" height="664" key="GridCell.Tab.1.bottom/0.0.2194.1194@0.0.2194.1194" timestamp="1590934417718" />
+    <state width="2136" height="664" key="GridCell.Tab.1.center" timestamp="1590934417718">
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
     <state width="2151" height="888" key="GridCell.Tab.1.center/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590416987909" />
-    <state width="1025" height="284" key="GridCell.Tab.1.center/0.0.2194.1194@0.0.2194.1194" timestamp="1590932225062" />
-    <state width="1025" height="284" key="GridCell.Tab.1.left" timestamp="1590932225062">
+    <state width="2136" height="664" key="GridCell.Tab.1.center/0.0.2194.1194@0.0.2194.1194" timestamp="1590934417718" />
+    <state width="2136" height="664" key="GridCell.Tab.1.left" timestamp="1590934417718">
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
     <state width="2151" height="888" key="GridCell.Tab.1.left/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590416987909" />
-    <state width="1025" height="284" key="GridCell.Tab.1.left/0.0.2194.1194@0.0.2194.1194" timestamp="1590932225062" />
-    <state width="1025" height="284" key="GridCell.Tab.1.right" timestamp="1590932225062">
+    <state width="2136" height="664" key="GridCell.Tab.1.left/0.0.2194.1194@0.0.2194.1194" timestamp="1590934417718" />
+    <state width="2136" height="664" key="GridCell.Tab.1.right" timestamp="1590934417718">
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
     <state width="2151" height="888" key="GridCell.Tab.1.right/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590416987909" />
-    <state width="1025" height="284" key="GridCell.Tab.1.right/0.0.2194.1194@0.0.2194.1194" timestamp="1590932225062" />
+    <state width="2136" height="664" key="GridCell.Tab.1.right/0.0.2194.1194@0.0.2194.1194" timestamp="1590934417718" />
     <state x="925" y="300" key="RollbackChangesDialog" timestamp="1590931207471">
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
@@ -501,11 +507,11 @@
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
     <state x="938" y="295" key="VCS.ChangeListViewerDialog/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590235493732" />
-    <state x="690" y="330" key="Vcs.Push.Dialog.v2" timestamp="1590931241205">
+    <state x="690" y="330" key="Vcs.Push.Dialog.v2" timestamp="1590932463802">
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
     <state x="690" y="330" key="Vcs.Push.Dialog.v2/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590416024619" />
-    <state x="690" y="330" key="Vcs.Push.Dialog.v2/0.0.2194.1194@0.0.2194.1194" timestamp="1590931241205" />
+    <state x="690" y="330" key="Vcs.Push.Dialog.v2/0.0.2194.1194@0.0.2194.1194" timestamp="1590932463802" />
     <state x="93" y="93" width="2008" height="1008" key="com.intellij.history.integration.ui.views.FileHistoryDialog" timestamp="1590702957071">
       <screen x="0" y="0" width="2194" height="1194" />
     </state>

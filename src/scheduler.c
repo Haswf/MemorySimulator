@@ -122,7 +122,7 @@ void firstComeFirstServe(memory_allocator_t* allocator, Deque* processes, Deque*
         finish_process(process, finish, *clock, deque_size(suspended));
     }
     free_deque(pending);
-    free_deque(pending);
+    free_deque(suspended);
 }
 
 void roundRobin(memory_allocator_t* allocator, Deque* processes, Deque* finish, long long int* clock, long long int quantum) {
@@ -205,6 +205,7 @@ int compare_PID(void * a, void * b) {
 void shortestRemainingTimeFirst(memory_allocator_t* allocator, Deque* processes, Deque* finish, long long int* clock) {
     heap_t *suspended = create_heap(deque_size(processes), compare_remaining_time);
     Deque *pending = new_deque((void (*)(void *)) printProcess);
+    long long int last_pid = -1;
     while (deque_size(processes) > 0) {
         process_t *process = deque_pop(processes);
         deque_push(pending, process);
@@ -221,26 +222,33 @@ void shortestRemainingTimeFirst(memory_allocator_t* allocator, Deque* processes,
             if (allocator->require_allocation(allocator->structure, process)){
                 allocator->malloc(allocator->structure, process, *clock);
             }
-            long long int page_fault_time = allocator->page_fault(allocator->structure, process) > 0;
-            process->remaining_time += page_fault_time;
-
-            allocator->info(allocator->structure, process, *clock);
-
-            while (process->remaining_time > 0) {
-                if ((allocator->load_time_left(allocator->structure, process)) > 0) {
-                    allocator->load(allocator->structure, process);
-                } else {
-                    execute(process, *clock);
-                    allocator->use(allocator->structure, process, *clock);
-                }
-                tick(clock);
-                load_new_process(suspended, pending, *clock);
+            if (process->pid != last_pid) {
+                long long int page_fault_time = allocator->page_fault(allocator->structure, process) > 0;
+                process->remaining_time += page_fault_time;
+                allocator->info(allocator->structure, process, *clock);
             }
 
-            allocator->free(allocator->structure, process, *clock);
-            process_t * copy = create_process(process->timeArrived, process->pid, process->memory, process->job_time);
-            copy->finish_time = *clock;
-            deque_insert(finish, copy);
+
+            if ((allocator->load_time_left(allocator->structure, process)) > 0) {
+                allocator->load(allocator->structure, process);
+            } else {
+                execute(process, *clock);
+                allocator->use(allocator->structure, process, *clock);
+            }
+            last_pid = process->pid;
+            tick(clock);
+            load_new_process(suspended, pending, *clock);
+
+            if (process->remaining_time == 0) {
+                allocator->free(allocator->structure, process, *clock);
+                process_t * copy = create_process(process->timeArrived, process->pid, process->memory, process->job_time);
+                copy->finish_time = *clock;
+                deque_insert(finish, copy);
+            } else {
+                heap_insert(suspended, running);
+            }
+
+
         } else {
             tick(clock);
         }

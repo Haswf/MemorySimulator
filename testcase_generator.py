@@ -9,13 +9,13 @@ MAX_JOB_TIME = 100
 MIN_JOB_TIME = 1
 MAX_MEMORY = 100
 MIN_PID = 0
-MAX_PID = 2000
+MAX_PID = 20
 pids = []
 processes = []
 
 def testcase_generator():	
-	with open("testcase.txt", 'w') as f:
-		for i in range(0, random.randrange(1, 50)):
+	with open("benchmark-cm.txt", 'w') as f:
+		for i in range(0, random.randrange(MIN_PID, MAX_PID)):
 			this_pid = random.randrange(MIN_PID, MAX_PID)	
 			while this_pid in pids:
 				this_pid = random.randrange(MIN_PID, MAX_PID)
@@ -25,8 +25,8 @@ def testcase_generator():
 
 
 def run():
-	v = "./scheduler -f testcase.txt -a rr -s 100 -m v -q 10"
-	cm = "./scheduler -f testcase.txt -a rr -s 100 -m cm -q 10"
+	v = "./scheduler -f benchmark-cm.txt -a rr -s 100 -m v -q 10"
+	cm = "./scheduler -f benchmark-cm.txt -a rr -s 100 -m cm -q 10"
 	v_result = subprocess.run(v.split(), stdout=subprocess.PIPE)
 	cm_result = subprocess.run(cm.split(), stdout=subprocess.PIPE)
 	# if str(v_result.stdout.split("/n")[-2]) != str(cm_result.stdout.split("/n")[-2]):

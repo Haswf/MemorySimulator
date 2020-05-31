@@ -4,11 +4,11 @@
 #include "stdbool.h"
 #include "process.h"
 
-void output_finish(int clock, process_t* process, int proc_remaining) {
+void output_finish(long long int clock, process_t* process, long long int proc_remaining) {
     printf("%d, FINISHED, id=%d, proc-remaining=%d\n", clock, process->pid, proc_remaining);
 }
 
-process_t* create_process(int timeArrived, int pid, int memory, int job_time) {
+process_t* create_process(long long int timeArrived, long long int pid, long long int memory, long long int job_time) {
     process_t* newProcess = (process_t*)malloc(sizeof(*newProcess));
     if (newProcess == NULL) {
         return NULL;

@@ -19,17 +19,17 @@
 #include "log.h"
 #include "memory_allocator.h"
 #include "unlimited.h"
-#include "output.h"
 #include "deque.h"
 #include "virtual_memory.h"
 
 int compare_PID(void * a, void * b);
 
-int firstComeFirstServe(memory_allocator_t* allocator, Deque* processes, Deque* finish, int* clock);
-void execute(process_t* process, int clock);
-void finish_process(process_t* process, Deque* finish, int clock, int proc_remaining);
-void analysis(Deque* finished, int clock);
-void load_new_process(heap_t* suspended, Deque* pending, int clock);
+void firstComeFirstServe(memory_allocator_t* allocator, Deque* processes, Deque* finish, long long int* clock);
+void execute(process_t* process, long long int clock);
+void finish_process(process_t* process, Deque* finish, long long int clock, long long int proc_remaining);
+void analysis(Deque* finished, long long int clock);
+void load_new_process(heap_t* suspended, Deque* pending, long long int clock);
+void print_memory(long long int* addresses, long long int count);
 
 #define MAX_PROCESS_ARRIVAL_PER_TICK 100
 #endif //COMP30023_2020_PROJECT_2_SCHEDULER_H

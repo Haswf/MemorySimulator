@@ -8,27 +8,27 @@ void* unlimited_allocate_memory(void* structure, process_t* process) {
     return (void*)1;
 };
 
-void unlimited_use_memory(void* structure, process_t* process, int clock) {
+void unlimited_use_memory(void* structure, process_t* process, long long int clock) {
 
 };
-void unlimited_free_memory(void* structure, process_t* process) {
+void unlimited_free_memory(void* structure, process_t* process, long long int clock) {
 
 };
 
-int unlimited_load_time_left(void* structure, process_t* process) {
+long long int unlimited_load_time_left(void* structure, process_t* process) {
     return 0;
 };
 void unlimited_load_memory(void* structure, process_t* process) {
 
 };
-int unlimited_require_allocation(void* structure, process_t* process) {
+long long int unlimited_require_allocation(void* structure, process_t* process) {
     return 0;
 }
-int unlimited_page_fault(void* structure, process_t* process) {
+long long int unlimited_page_fault(void* structure, process_t* process) {
     return 0;
 }
-void unlimited_process_info(void* structure, process_t* process, int clock) {
-    printf("%d, RUNNING, id=%d, remaining-time=%d\n", clock, process->pid, process->remaining_time);
+void unlimited_process_info(void* structure, process_t* process, long long int clock) {
+    printf("%lld, RUNNING, id=%lld, remaining-time=%lld\n", clock, process->pid, process->remaining_time);
 }
 memory_allocator_t* create_unlimited_allocator() {
     memory_allocator_t* allocator = malloc(sizeof(*allocator));

@@ -18,26 +18,26 @@
 
 typedef struct memory_list {
     Dlist* list;
-    int page_size;
+    long long int page_size;
 } memory_list_t;
 
-int swapping_load_time_left(memory_list_t* memoryList, process_t* process);
+long long int swapping_load_time_left(memory_list_t* memoryList, process_t* process);
 void log_memory_list(memory_list_t* memoryList);
-memory_list_t* create_memory_list(int mem_size, int page_size);
+memory_list_t* create_memory_list(long long int mem_size, long long int page_size);
 void free_memory_list(memory_list_t* memoryList);
 Node* first_fit(memory_list_t* memoryList, process_t* process);
 Node* allocate(memory_list_t* memoryList, Node* hole, process_t* process);
 void print_memory_list(memory_list_t* memoryList);
 Node* evict(memory_list_t* memoryList, Node* nodeToEvict);
 Node* find_least_recently_used(memory_list_t* memoryList);
-void swapping_use_memory(memory_list_t* memoryList, process_t* process, int clock);
-Node* swapping_allocate_memory(memory_list_t* memoryList, process_t* process, int clock);
-void swapping_free_memory(memory_list_t* memoryList, process_t* process, int clock);
-int byteToRequiredPage(int bytes, int page_size);
-int byteToAvailablePage(int bytes, int page_size);
+void swapping_use_memory(memory_list_t* memoryList, process_t* process, long long int clock);
+Node* swapping_allocate_memory(memory_list_t* memoryList, process_t* process, long long int clock);
+void swapping_free_memory(memory_list_t* memoryList, process_t* process, long long int clock);
+long long int byteToRequiredPage(long long int bytes, long long int page_size);
+long long int byteToAvailablePage(long long int bytes, long long int page_size);
 void swapping_load_memory(memory_list_t* memoryList, process_t* process);
-memory_allocator_t* create_swapping_allocator(int memory_size, int page_size);
-int swapping_memory_usage(memory_list_t* memoryList, process_t* process);
+memory_allocator_t* create_swapping_allocator(long long int memory_size, long long int page_size);
+long long int swapping_memory_usage(memory_list_t* memoryList, process_t* process);
 void swapping_print_addresses(memory_list_t* memoryList, process_t* process);
 
 #endif //SCHEDULER_SWAPPING_H

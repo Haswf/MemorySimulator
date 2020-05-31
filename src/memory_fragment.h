@@ -13,18 +13,18 @@
 
 
 typedef struct memory_fragment {
-    int type;
-    int page_start;
-    int byte_start;
-    int page_length;
-    int byte_length;
-    int pid;
-    int last_access;
-    int load_time;
+    long long int type;
+    long long int page_start;
+    long long int byte_start;
+    long long int page_length;
+    long long int byte_length;
+    long long int pid;
+    long long int last_access;
+    long long int load_time;
 } memory_fragment_t;
 
-memory_fragment_t* create_hole_fragment(int byte_start, int page_start, int byte_length, int page_length);
-memory_fragment_t* create_process_fragment(int byte_start, int page_start, int byte_length, int page_length, int pid);
+memory_fragment_t* create_hole_fragment(long long int byte_start, long long int page_start, long long int byte_length, long long int page_length);
+memory_fragment_t* create_process_fragment(long long int byte_start, long long int page_start, long long int byte_length, long long int page_length, long long int pid);
 void print_fragment(memory_fragment_t* fragment);
 void free_fragment(memory_fragment_t* fragment);
 void dlist_free_fragment(void* fragment);

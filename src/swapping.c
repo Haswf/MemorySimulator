@@ -3,6 +3,7 @@
 //
 #include "swapping.h"
 #include "virtual_memory.h"
+#include "scheduler.h"
 
 
 /**
@@ -11,7 +12,7 @@
  * @param page_size size of each page in memory
  * @return
  */
-memory_list_t* create_memory_list(int mem_size, int page_size) {
+memory_list_t* create_memory_list(long long int mem_size, long long int page_size) {
     memory_list_t* m_list = (memory_list_t*)malloc(sizeof(*m_list));
     assert(m_list);
     m_list->page_size = page_size;
@@ -46,7 +47,7 @@ Node* first_fit(memory_list_t* memoryList, process_t* process) {
     /*
      * Find how many pages are required. If a process need 98 bytes, 25 pages are required.
      */
-    int pages_required = byteToRequiredPage(process->memory, memoryList->page_size);
+    long long int pages_required = byteToRequiredPage(process->memory, memoryList->page_size);
     Node* current = memoryList->list->head;
     while (current) {
         memory_fragment_t* fragment = (memory_fragment_t*) current->data;
@@ -65,7 +66,7 @@ Node* first_fit(memory_list_t* memoryList, process_t* process) {
  * @param page_size
  * @return
  */
-int byteToRequiredPage(int bytes, int page_size) {
+long long int byteToRequiredPage(long long int bytes, long long int page_size) {
     if (bytes % page_size == 0) {
         return bytes/page_size;
     }
@@ -78,7 +79,7 @@ int byteToRequiredPage(int bytes, int page_size) {
  * Convert a consecutive memory length in bytes to available page sizes.
  * For instance, a memory of 99 bytes can hold 24 pages.
  */
-int byteToAvailablePage(int bytes, int page_size) {
+long long int byteToAvailablePage(long long int bytes, long long int page_size) {
     return bytes/page_size;
 }
 
@@ -92,9 +93,9 @@ int byteToAvailablePage(int bytes, int page_size) {
 Node* allocate(memory_list_t* memoryList, Node* hole, process_t* process) {
     memory_fragment_t* fragment = (memory_fragment_t*)hole->data;
     // Calculate how many pages are required for the process.
-    int required_page = byteToRequiredPage(process->memory, memoryList->page_size);
+    long long int required_page = byteToRequiredPage(process->memory, memoryList->page_size);
     // Calculate how much space will be required to save these pages.
-    int required_memory = required_page*4;
+    long long int required_memory = required_page*4;
     // Break the hole into two parts
     dlist_insert_after(memoryList->list, hole,
             create_hole_fragment(
@@ -113,7 +114,7 @@ Node* allocate(memory_list_t* memoryList, Node* hole, process_t* process) {
     log_info("<Scheduler> Memory allocated for process %d (%d bytes)", process->pid, process->memory);
     return hole;
 }
-int swapping_load_time_left(memory_list_t* memoryList, process_t* process) {
+long long int swapping_load_time_left(memory_list_t* memoryList, process_t* process) {
     Node* current = memoryList->list->head;
     memory_fragment_t* fragment = NULL;
     while (current) {
@@ -178,7 +179,7 @@ Node* join_prev(memory_list_t* memoryList, Node* nodeToEvict) {
      * [0, 0, 100, 25] + [100, 25, 100, 25] = [0, 0, 200, 50]
      * Byte start and page start of the previous fragment should remain unchanged */
     /* Update total byte length*/
-    int total_size = prevFragment->byte_length + fragmentToEvict->byte_length;
+    long long int total_size = prevFragment->byte_length + fragmentToEvict->byte_length;
     prevFragment->byte_length = total_size;
     /* Update total page length*/
     prevFragment->page_length = byteToAvailablePage(total_size, memoryList->page_size);
@@ -209,7 +210,7 @@ Node* join_next(memory_list_t* memoryList, Node* nodeToEvict) {
      * Byte start and page start of the previous fragment should remain unchanged */
 
     /* Update total byte length*/
-    int total_size = fragmentToEvict->byte_length + nextFragment->byte_length;
+    long long int total_size = fragmentToEvict->byte_length + nextFragment->byte_length;
     fragmentToEvict->byte_length = total_size;
     /* Update total page length*/
     fragmentToEvict->page_length = byteToAvailablePage(total_size, memoryList->page_size);
@@ -228,7 +229,7 @@ Node* find_least_recently_used(memory_list_t* memoryList) {
     Node* current = memoryList->list->head;
     memory_fragment_t* fragment = NULL;
     Node* nodeToSwap = NULL;
-    int minLastAccess;
+    long long int minLastAccess;
 
     while (current) {
         fragment = (memory_fragment_t*)current->data;
@@ -282,8 +283,9 @@ Node* evict(memory_list_t* memoryList, Node* nodeToEvict) {
  * @param memoryList
  * @param process
  * @param clock
+
  */
-Node* swapping_allocate_memory(memory_list_t* memoryList, process_t* process, int clock) {
+Node* swapping_allocate_memory(memory_list_t* memoryList, process_t* process, long long int clock) {
     /*
      * Use first fit algorithm to find a fragment large enough for the process
      */
@@ -298,13 +300,13 @@ Node* swapping_allocate_memory(memory_list_t* memoryList, process_t* process, in
         Node* toEvict = find_least_recently_used(memoryList);
         if (toEvict) {
             memory_fragment_t* fragment = (memory_fragment_t*)toEvict->data;
-            int page_to_free = fragment->page_length;
-            int* addr_to_print = malloc(sizeof(*addr_to_print) * page_to_free);
-            int index = 0;
-            for (int i=0; i<fragment->page_length; i++) {
+            long long int page_to_free = fragment->page_length;
+            long long int* addr_to_print = malloc(sizeof(*addr_to_print) * page_to_free);
+            long long int index = 0;
+            for (long long int i=0; i<fragment->page_length; i++) {
                 addr_to_print[index++] = fragment->page_start + i;
             }
-            printf("%d, EVICTED, mem-addresses=", clock);
+            printf("%lld, EVICTED, mem-addresses=", clock);
             print_memory(addr_to_print, fragment->page_length);
             printf("\n");
             free(addr_to_print);
@@ -328,6 +330,7 @@ memory_fragment_t* get_fragment(memory_list_t* memoryList, process_t* process) {
         }
         current = current->next;
     }
+    return NULL;
 }
 
 /**
@@ -337,16 +340,16 @@ memory_fragment_t* get_fragment(memory_list_t* memoryList, process_t* process) {
  * @param process
  * @param clock
  */
-void swapping_use_memory(memory_list_t* memoryList, process_t* process, int clock) {
+void swapping_use_memory(memory_list_t* memoryList, process_t* process, long long int clock) {
     assert(memoryList && process);
     memory_fragment_t* fragment = get_fragment(memoryList, process);
     fragment->last_access = clock;
 }
 
-void swapping_process_info(memory_list_t* memoryList, process_t* process, int clock) {
+void swapping_process_info(memory_list_t* memoryList, process_t* process, long long int clock) {
     memory_fragment_t* fragment = get_fragment(memoryList, process);
     assert(fragment);
-    printf("%d, RUNNING, id=%d, remaining-time=%d, load-time=%d, mem-usage=%d%%, mem-addresses=",
+    printf("%lld, RUNNING, id=%lld, remaining-time=%lld, load-time=%lld, mem-usage=%lld%%, mem-addresses=",
            clock,
            process->pid,
            process->remaining_time,
@@ -359,19 +362,19 @@ void swapping_process_info(memory_list_t* memoryList, process_t* process, int cl
 void swapping_print_addresses(memory_list_t* memoryList, process_t* process) {
     assert(memoryList && process);
     memory_fragment_t* fragment = get_fragment(memoryList, process);
-    int* addr_to_print = malloc(sizeof(*addr_to_print) * fragment->page_length);
-    int index = 0;
-    for (int i=0; i<fragment->page_length; i++) {
+    long long int* addr_to_print = malloc(sizeof(*addr_to_print) * fragment->page_length);
+    long long int index = 0;
+    for (long long int i=0; i<fragment->page_length; i++) {
         addr_to_print[index++] = fragment->page_start + i;
     }
     print_memory(addr_to_print, fragment->page_length);
     free(addr_to_print);
 }
 
-int swapping_memory_usage(memory_list_t* memoryList, process_t* process) {
+long long int swapping_memory_usage(memory_list_t* memoryList, process_t* process) {
     assert(memoryList && process);
-    int total = 0;
-    int in_use = 0;
+    long long int total = 0;
+    long long int in_use = 0;
     Node* current = memoryList->list->head;
     while (current) {
         memory_fragment_t* fragment = (memory_fragment_t*)current->data;
@@ -384,19 +387,19 @@ int swapping_memory_usage(memory_list_t* memoryList, process_t* process) {
     return ceil((double)in_use * 100 /(double)total);
 }
 
-void swapping_free_memory(memory_list_t* memoryList, process_t* process, int clock) {
+void swapping_free_memory(memory_list_t* memoryList, process_t* process, long long int clock) {
     assert(memoryList && process);
     Node* current = memoryList->list->head;
     while (current) {
         memory_fragment_t* fragment = (memory_fragment_t*)current->data;
         if (fragment->type == PROCESS_FRAGMENT && fragment->pid == process->pid) {
-            int page_to_free = fragment->page_length;
-            int* addr_to_print = malloc(sizeof(*addr_to_print) * page_to_free);
-            int index = 0;
-            for (int i=0; i<fragment->page_length; i++) {
+            long long int page_to_free = fragment->page_length;
+            long long int* addr_to_print = malloc(sizeof(*addr_to_print) * page_to_free);
+            long long int index = 0;
+            for (long long int i=0; i<fragment->page_length; i++) {
                 addr_to_print[index++] = fragment->page_start + i;
             }
-            printf("%d, EVICTED, mem-addresses=", clock);
+            printf("%lld, EVICTED, mem-addresses=", clock);
             print_memory(addr_to_print, fragment->page_length);
             printf("\n");
             free(addr_to_print);
@@ -407,7 +410,7 @@ void swapping_free_memory(memory_list_t* memoryList, process_t* process, int clo
     }
 }
 
-int swapping_require_allocation(memory_list_t* memoryList, process_t* process) {
+long long int swapping_require_allocation(memory_list_t* memoryList, process_t* process) {
     assert(memoryList && process);
     Node* current = memoryList->list->head;
     while (current) {
@@ -420,22 +423,22 @@ int swapping_require_allocation(memory_list_t* memoryList, process_t* process) {
     return -1;
 }
 
-int swapping_page_fault(memory_list_t* memoryList, process_t* process) {
+long long int swapping_page_fault(memory_list_t* memoryList, process_t* process) {
     assert(memoryList && process);
     return 0;
 }
 
-memory_allocator_t* create_swapping_allocator(int memory_size, int page_size) {
+memory_allocator_t* create_swapping_allocator(long long int memory_size, long long int page_size) {
     memory_allocator_t* allocator = malloc(sizeof(*allocator));
     assert(allocator);
-    allocator->malloc = (void *(*)(void *, process_t *)) swapping_allocate_memory;
-    allocator->info = (void (*)(void *, process_t *, int)) swapping_process_info;
-    allocator->use = (void (*)(void *, process_t *, int)) swapping_use_memory;
-    allocator->free = (void (*)(void *, process_t *)) swapping_free_memory;
+    allocator->malloc = (void *(*)(void *, process_t *, long long int)) swapping_allocate_memory;
+    allocator->info = (void (*)(void *, process_t *, long long int)) swapping_process_info;
+    allocator->use = (void (*)(void *, process_t *, long long int)) swapping_use_memory;
+    allocator->free = (void (*)(void *, process_t *, long long int)) swapping_free_memory;
     allocator->load = (void (*)(void *, process_t *)) swapping_load_memory;
-    allocator->load_time_left = (int (*)(void *, process_t *)) swapping_load_time_left;
-    allocator->require_allocation = (int (*)(void *, process_t *)) swapping_require_allocation;
-    allocator->page_fault = (int (*)(void *, process_t *)) swapping_page_fault;
+    allocator->load_time_left = (long long int (*)(void *, process_t *)) swapping_load_time_left;
+    allocator->require_allocation = (long long int (*)(void *, process_t *)) swapping_require_allocation;
+    allocator->page_fault = (long long int (*)(void *, process_t *)) swapping_page_fault;
     // Unlimited allocator doesn't have a structure to manage memory;
     allocator->structure = create_memory_list(memory_size, page_size);
     return allocator;

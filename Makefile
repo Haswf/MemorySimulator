@@ -11,11 +11,11 @@ CC = gcc
 
 ## Create .o files from .c files. Searches for .c files with same .o names given in OBJ
 $(EXE): $(OBJ)
-	$(CC) -o $@ $^ $(CFLAGS)
+	$(CC) -o $@ $^ -lm $(CFLAGS)
 
 ## Create executable linked file from object files.
 %.o: %.c $(DEPS)
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) -c -o $@ -lm $<
 
 # Perform clean
 clean:

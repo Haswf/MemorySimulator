@@ -9,18 +9,18 @@
 #include <stdio.h>
 
 typedef struct process {
-    int timeArrived;
-    int pid;
-    int memory;
-    int remaining_time;
-    int job_time;
-    int finish_time;
+    long long int timeArrived;
+    long long int pid;
+    long long int memory;
+    long long int remaining_time;
+    long long int job_time;
+    long long int finish_time;
 } process_t;
 
 
-void output_finish(int clock, process_t* process, int proc_remaining);
+void output_finish(long long int clock, process_t* process, long long int proc_remaining);
 
-process_t* create_process(int timeArrived, int pid, int memory, int jobTime);
+process_t* create_process(long long int timeArrived, long long int pid, long long int memory, long long int jobTime);
 
 void printProcess(process_t* process);
 

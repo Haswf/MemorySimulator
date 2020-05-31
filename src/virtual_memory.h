@@ -20,9 +20,9 @@
 #define MIN_PAGE_REQUIRED_TO_RUN 4
 
 typedef struct virtual_memory {
-    int page_size;
-    int free_frame;
-    int total_frame;
+    long long int page_size;
+    long long int free_frame;
+    long long int total_frame;
     /* This array records which process each page has been mapped into */
     int* page_frames;
     /* This array records how many time each page has been referenced */
@@ -31,34 +31,33 @@ typedef struct virtual_memory {
 } virtual_memory_t;
 
 typedef struct page_table_entry {
-    int validity;
-    int frame_number;
-    int reference;
+    long long int validity;
+    long long int frame_number;
+    long long int reference;
 } page_table_entry_t;
 
 
 typedef struct page_table_node {
-    int pid;
-    int page_count;
+    long long int pid;
+    long long int page_count;
     page_table_entry_t* page_table_pointer;
-    int last_access;
-    int valid_page_count;
-    int loading_time_left;
+    long long int last_access;
+    long long int valid_page_count;
+    long long int loading_time_left;
 } page_table_node_t;
 
-int evict_one_page(virtual_memory_t* memory_manager, int frame_number);
-page_table_node_t* create_page_table_node(int pid, int page_count);
-virtual_memory_t* create_virtual_memory(int memory_size, int page_size);
-int find_the_oldest_process(virtual_memory_t* memory_manager, int skip);
-void virtual_memory_allocate_memory_LRU(virtual_memory_t* memory_manager, process_t* process, int clock);
-void virtual_memory_allocate_memory_LFU(virtual_memory_t* memory_manager, process_t* process, int clock);
+long long int evict_one_page(virtual_memory_t* memory_manager, long long int frame_number);
+page_table_node_t* create_page_table_node(long long int pid, long long int page_count);
+virtual_memory_t* create_virtual_memory(long long int memory_size, long long int page_size);
+long long int find_the_oldest_process(virtual_memory_t* memory_manager, long long int skip);
+void virtual_memory_allocate_memory_LRU(virtual_memory_t* memory_manager, process_t* process, long long int clock);
+void virtual_memory_allocate_memory_LFU(virtual_memory_t* memory_manager, process_t* process, long long int clock);
 
-int least_recent_used(virtual_memory_t* memory_manager, int skip);
-memory_allocator_t* create_virtual_memory_allocator_LFU(int memory_size, int page_size);
-memory_allocator_t* create_virtual_memory_allocator_LRU(int memory_size, int page_size);
-void print_memory(int* addresses, int count);
-int map(page_table_node_t * page_table, int frame_number);
-int virtual_memory_usage(virtual_memory_t* memory_manager);
+long long int least_recent_used(virtual_memory_t* memory_manager, long long int skip);
+memory_allocator_t* create_virtual_memory_allocator_LFU(long long int memory_size, long long int page_size);
+memory_allocator_t* create_virtual_memory_allocator_LRU(long long int memory_size, long long int page_size);
+long long int map(page_table_node_t * page_table, long long int frame_number);
+long long int virtual_memory_usage(virtual_memory_t* memory_manager);
 void virtual_print_addresses(virtual_memory_t* memory_manager, process_t* process);
 void aging(virtual_memory_t* memory_manager);
 
@@ -69,5 +68,5 @@ void aging(virtual_memory_t* memory_manager);
  * @param pid
  * @return
  */
-int first_page(virtual_memory_t* memory_manager, int pid);
+long long int first_page(virtual_memory_t* memory_manager, long long int pid);
 #endif //SCHEDULER_VIRTUAL_MEMORY_H

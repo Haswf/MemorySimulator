@@ -7,7 +7,7 @@
 
 
 
-memory_fragment_t* create_hole_fragment(int byte_start, int page_start, int byte_length, int page_length) {
+memory_fragment_t* create_hole_fragment(long long int byte_start, long long int page_start, long long int byte_length, long long int page_length) {
     memory_fragment_t* fragment = (memory_fragment_t*)malloc(sizeof(*fragment));
     fragment->type = HOLE_FRAGMENT;
     fragment->byte_start = byte_start;
@@ -20,7 +20,7 @@ memory_fragment_t* create_hole_fragment(int byte_start, int page_start, int byte
     return fragment;
 }
 
-memory_fragment_t* create_process_fragment(int byte_start, int page_start, int byte_length, int page_length, int pid) {
+memory_fragment_t* create_process_fragment(long long int byte_start, long long int page_start, long long int byte_length, long long int page_length, long long int pid) {
     memory_fragment_t* fragment = (memory_fragment_t*)malloc(sizeof(*fragment));
     fragment->type = PROCESS_FRAGMENT;
     fragment->byte_start = byte_start;
@@ -34,7 +34,7 @@ memory_fragment_t* create_process_fragment(int byte_start, int page_start, int b
 }
 
 void print_fragment(memory_fragment_t* fragment) {
-    printf("%s b_start: %4d | p_start: %4d | b_length: %4d | p_length:%d | pid:%4d | last_access:%4d|\n",
+    printf("%s b_start: %4lld | p_start: %4lld | b_length: %4lld | p_length:%lld | pid:%4lld | last_access:%4lld|\n",
               fragment->type == HOLE_FRAGMENT?"H\t": "P\t",
               fragment->byte_start,
               fragment->page_start,

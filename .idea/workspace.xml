@@ -29,17 +29,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="779d517e-22af-4973-a94d-126a165a96a4" name="Default Changelist" comment="fix: Replace int with long long int">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scheduler" beforeDir="false" afterPath="$PROJECT_DIR$/scheduler" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dlist.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/dlist.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/process.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/process.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scheduler.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/scheduler.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/unlimited.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/unlimited.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/unlimited.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/unlimited.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/virtual_memory.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/virtual_memory.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/virtual_memory.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/virtual_memory.h" afterDir="false" />
-    </list>
+    <list default="true" id="779d517e-22af-4973-a94d-126a165a96a4" name="Default Changelist" comment="fix: fix warnings" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -125,7 +115,7 @@
       <workItem from="1590668746800" duration="8607000" />
       <workItem from="1590741126685" duration="11425000" />
       <workItem from="1590833011887" duration="1834000" />
-      <workItem from="1590924877763" duration="3457000" />
+      <workItem from="1590924877763" duration="3517000" />
     </task>
     <task id="LOCAL-00001" summary="feat(process.c scheduler.c): Implement argument parsing and load process from file">
       <created>1589733108906</created>
@@ -323,7 +313,14 @@
       <option name="project" value="LOCAL" />
       <updated>1590927443032</updated>
     </task>
-    <option name="localTasksCounter" value="29" />
+    <task id="LOCAL-00029" summary="fix: fix warn ings">
+      <created>1590928396601</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1590928396601</updated>
+    </task>
+    <option name="localTasksCounter" value="30" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -343,7 +340,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="feat: Use heap to sort processes" />
     <MESSAGE value="feat: Implemented structure for memory management" />
     <MESSAGE value="feat: Added swapping for FCFS" />
     <MESSAGE value="feat: Add proper logging" />
@@ -368,7 +364,8 @@
     <MESSAGE value="fix: Fixed potential negative malloc size" />
     <MESSAGE value="fix: Add Cmake-build-debug to .gitignore" />
     <MESSAGE value="fix: Replace int with long long int" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: Replace int with long long int" />
+    <MESSAGE value="fix: fix warnings" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: fix warnings" />
   </component>
   <component name="WindowStateProjectService">
     <state x="505" y="269" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1590926844044">
@@ -481,11 +478,11 @@
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
     <state x="938" y="295" key="VCS.ChangeListViewerDialog/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590235493732" />
-    <state x="690" y="330" key="Vcs.Push.Dialog.v2" timestamp="1590927446227">
+    <state x="690" y="330" key="Vcs.Push.Dialog.v2" timestamp="1590928398755">
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
     <state x="690" y="330" key="Vcs.Push.Dialog.v2/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590416024619" />
-    <state x="690" y="330" key="Vcs.Push.Dialog.v2/0.0.2194.1194@0.0.2194.1194" timestamp="1590927446227" />
+    <state x="690" y="330" key="Vcs.Push.Dialog.v2/0.0.2194.1194@0.0.2194.1194" timestamp="1590928398755" />
     <state x="93" y="93" width="2008" height="1008" key="com.intellij.history.integration.ui.views.FileHistoryDialog" timestamp="1590702957071">
       <screen x="0" y="0" width="2194" height="1194" />
     </state>

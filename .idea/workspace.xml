@@ -29,29 +29,9 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="779d517e-22af-4973-a94d-126a165a96a4" name="Default Changelist" comment="feat: Add report">
+    <list default="true" id="779d517e-22af-4973-a94d-126a165a96a4" name="Default Changelist" comment="docs: Add comments">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scheduler" beforeDir="false" afterPath="$PROJECT_DIR$/scheduler" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/constants.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/constants.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/log.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/log.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/memory_allocator.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory_allocator.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/memory_fragment.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory_fragment.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/memory_fragment.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/memory_fragment.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/priorityqueue.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/priorityqueue.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/process.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/process.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/process.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/process.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/processes.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/reordering.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/rr_memoryoverlap.txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/scheduler.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/scheduler.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scheduler.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/scheduler.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/swapping.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/swapping.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/swapping.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/swapping.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/timejumps.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/unlimited.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/unlimited.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/virtual_memory.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/virtual_memory.c" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -138,7 +118,7 @@
       <workItem from="1590668746800" duration="8607000" />
       <workItem from="1590741126685" duration="11425000" />
       <workItem from="1590833011887" duration="1834000" />
-      <workItem from="1590924877763" duration="13542000" />
+      <workItem from="1590924877763" duration="14168000" />
     </task>
     <task id="LOCAL-00001" summary="feat(process.c scheduler.c): Implement argument parsing and load process from file">
       <created>1589733108906</created>
@@ -371,7 +351,14 @@
       <option name="project" value="LOCAL" />
       <updated>1590936240105</updated>
     </task>
-    <option name="localTasksCounter" value="34" />
+    <task id="LOCAL-00034" summary="docs: Add comments">
+      <created>1590938800577</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1590938800577</updated>
+    </task>
+    <option name="localTasksCounter" value="35" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -391,7 +378,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="feat: Add time to log" />
     <MESSAGE value="feat: Use pages in memory list" />
     <MESSAGE value="feat: Integrate scheduler with memory allocator" />
     <MESSAGE value="fix: Fix bug in heap implementation" />
@@ -416,7 +402,8 @@
     <MESSAGE value="fix: fix strncpy" />
     <MESSAGE value="fix: fix memory leak" />
     <MESSAGE value="feat: Add report" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: Add report" />
+    <MESSAGE value="docs: Add comments" />
+    <option name="LAST_COMMIT_MESSAGE" value="docs: Add comments" />
   </component>
   <component name="WindowStateProjectService">
     <state x="505" y="269" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1590934537652">
@@ -529,11 +516,11 @@
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
     <state x="938" y="295" key="VCS.ChangeListViewerDialog/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590235493732" />
-    <state x="690" y="330" key="Vcs.Push.Dialog.v2" timestamp="1590936242391">
+    <state x="690" y="330" key="Vcs.Push.Dialog.v2" timestamp="1590938803289">
       <screen x="0" y="0" width="2194" height="1194" />
     </state>
     <state x="690" y="330" key="Vcs.Push.Dialog.v2/0.0.2194.1194/-1920.1080.1920.1040@0.0.2194.1194" timestamp="1590416024619" />
-    <state x="690" y="330" key="Vcs.Push.Dialog.v2/0.0.2194.1194@0.0.2194.1194" timestamp="1590936242391" />
+    <state x="690" y="330" key="Vcs.Push.Dialog.v2/0.0.2194.1194@0.0.2194.1194" timestamp="1590938803289" />
     <state x="93" y="93" width="2008" height="1008" key="com.intellij.history.integration.ui.views.FileHistoryDialog" timestamp="1590702957071">
       <screen x="0" y="0" width="2194" height="1194" />
     </state>

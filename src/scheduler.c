@@ -412,10 +412,10 @@ int main(int argc, char *argv[]) {
                 }
                 break;
             case 's':
-                memory_size = atoi(optarg);
+                memory_size = atoll(optarg);
                 break;
             case 'q':
-                quantum = atoi(optarg);
+                quantum = atoll(optarg);
                 break;
             default:
                 abort();
